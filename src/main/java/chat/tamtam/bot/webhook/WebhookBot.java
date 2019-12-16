@@ -8,11 +8,14 @@ import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.TamTamBot;
 import chat.tamtam.bot.exceptions.TamTamBotException;
-import chat.tamtam.botapi.TamTamBotAPI;
+import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
 import chat.tamtam.botapi.model.Subscription;
 import chat.tamtam.botapi.model.SubscriptionRequestBody;
+import chat.tamtam.botapi.queries.GetSubscriptionsQuery;
+import chat.tamtam.botapi.queries.SubscribeQuery;
+import chat.tamtam.botapi.queries.UnsubscribeQuery;
 
 /**
  * @author alexandrchuprin
@@ -20,17 +23,23 @@ import chat.tamtam.botapi.model.SubscriptionRequestBody;
 public abstract class WebhookBot implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final TamTamBotAPI api;
+    private final TamTamClient client;
     private final WebhookBotOptions options;
-    private final String path;
 
-    public WebhookBot(TamTamBotAPI api, WebhookBotOptions options, String path) {
-        this.api = api;
+    public WebhookBot(TamTamClient client, WebhookBotOptions options) {
+        this.client = client;
         this.options = options;
-        this.path = path;
     }
 
-    public void start(WebhookBotContainer container) throws TamTamBotException {
+    @Override
+    public TamTamClient getClient() {
+        return client;
+    }
+
+    /**
+     * @return registered webhook URL
+     */
+    public String start(WebhookBotContainer container) throws TamTamBotException {
         if (options.shouldRemoveOldSubscriptions()) {
             try {
                 unsubscribe();
@@ -39,34 +48,34 @@ public abstract class WebhookBot implements TamTamBot {
             }
         }
 
-        SubscriptionRequestBody body = new SubscriptionRequestBody(container.getWebhookUrl(this));
+        String webhookUrl = container.getWebhookUrl(this);
+        SubscriptionRequestBody body = new SubscriptionRequestBody(webhookUrl);
         body.updateTypes(options.getUpdateTypes());
 
         try {
-            api.subscribe(body).execute();
+            new SubscribeQuery(client, body).execute();
         } catch (APIException | ClientException e) {
             throw new TamTamBotException("Failed to start webhook bot", e);
         }
+
+        return webhookUrl;
     }
 
     public void stop(WebhookBotContainer container) {
-        if (options.shouldRemoveSubscriptionOnStop()) {
-            try {
-                api.unsubscribe(container.getWebhookUrl(this)).execute();
-            } catch (ClientException | APIException e) {
-                LOG.warn("Failed to remove current subscription", e);
-            }
-        }
+        // do nothing by default
     }
 
-    public String getPath() {
-        return path;
+    /**
+     * Should return unique key across all bots in container. Returns access token by default.
+     */
+    public String getKey() {
+        return client.getAccessToken();
     }
 
     private void unsubscribe() throws APIException, ClientException {
-        List<Subscription> subscriptions = api.getSubscriptions().execute().getSubscriptions();
+        List<Subscription> subscriptions = new GetSubscriptionsQuery(client).execute().getSubscriptions();
         for (Subscription subscription : subscriptions) {
-            api.unsubscribe(subscription.getUrl()).execute();
+            new UnsubscribeQuery(client, subscription.getUrl()).execute();
         }
     }
 }

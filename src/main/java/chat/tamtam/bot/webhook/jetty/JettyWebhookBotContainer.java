@@ -1,6 +1,8 @@
 package chat.tamtam.bot.webhook.jetty;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,7 +13,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import chat.tamtam.bot.exceptions.BotNotFoundException;
 import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
 import chat.tamtam.bot.webhook.WebhookBot;
@@ -21,6 +26,8 @@ import chat.tamtam.bot.webhook.WebhookBotContainerBase;
  * @author alexandrchuprin
  */
 public class JettyWebhookBotContainer extends WebhookBotContainerBase {
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private final Server server;
     private final String serverUrl;
 
@@ -36,7 +43,7 @@ public class JettyWebhookBotContainer extends WebhookBotContainerBase {
 
     @Override
     public String getWebhookUrl(WebhookBot bot) {
-        return String.format("http://%s%s", serverUrl, bot.getPath());
+        return String.format("http://%s%s", serverUrl, bot.getKey());
     }
 
     @Override
@@ -51,13 +58,10 @@ public class JettyWebhookBotContainer extends WebhookBotContainerBase {
     }
 
     @Override
-    public void join() throws InterruptedException {
-        server.join();
-        super.join();
-    }
-
     public void stop() throws Exception {
         server.stop();
+        server.join();
+        super.stop();
     }
 
     @NotNull
@@ -75,13 +79,27 @@ public class JettyWebhookBotContainer extends WebhookBotContainerBase {
         @Override
         public void handle(String target, Request baseRequest, HttpServletRequest request,
                            HttpServletResponse response) throws IOException {
+
+            String webhookResponse;
             try {
-                String webhookResponse = handleRequest(target, request.getMethod(), request.getInputStream());
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().println(webhookResponse);
-            } catch (WebhookException e) {
+                webhookResponse = handleRequest(target, request.getMethod(), request.getInputStream());
+            } catch (BotNotFoundException e) {
+                LOG.warn(e.getMessage());
                 response.sendError(e.getErrorCode(), e.getMessage());
+                return;
+            } catch (WebhookException e) {
+                String errorId = Long.toHexString(ThreadLocalRandom.current().nextLong());
+                LOG.error("Error happend while handling request: {}. Error ID: {}", request, errorId, e);
+                response.sendError(e.getErrorCode(), "Error ID: " + errorId);
+                return;
             }
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            if (webhookResponse == null) {
+                return;
+            }
+
+            response.getWriter().println(webhookResponse);
         }
     }
 }
