@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.TamTamBot;
+import chat.tamtam.bot.TamTamBotBase;
 import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
@@ -20,20 +21,14 @@ import chat.tamtam.botapi.queries.UnsubscribeQuery;
 /**
  * @author alexandrchuprin
  */
-public abstract class WebhookBot implements TamTamBot {
+public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final TamTamClient client;
     private final WebhookBotOptions options;
 
     public WebhookBot(TamTamClient client, WebhookBotOptions options) {
-        this.client = client;
+        super(client);
         this.options = options;
-    }
-
-    @Override
-    public TamTamClient getClient() {
-        return client;
     }
 
     /**
@@ -53,7 +48,7 @@ public abstract class WebhookBot implements TamTamBot {
         body.updateTypes(options.getUpdateTypes());
 
         try {
-            new SubscribeQuery(client, body).execute();
+            new SubscribeQuery(getClient(), body).execute();
         } catch (APIException | ClientException e) {
             throw new TamTamBotException("Failed to start webhook bot", e);
         }
@@ -69,13 +64,13 @@ public abstract class WebhookBot implements TamTamBot {
      * Should return unique key across all bots in container. Returns access token by default.
      */
     public String getKey() {
-        return client.getAccessToken();
+        return getClient().getAccessToken();
     }
 
     private void unsubscribe() throws APIException, ClientException {
-        List<Subscription> subscriptions = new GetSubscriptionsQuery(client).execute().getSubscriptions();
+        List<Subscription> subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
         for (Subscription subscription : subscriptions) {
-            new UnsubscribeQuery(client, subscription.getUrl()).execute();
+            new UnsubscribeQuery(getClient(), subscription.getUrl()).execute();
         }
     }
 }

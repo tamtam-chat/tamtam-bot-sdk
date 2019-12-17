@@ -57,6 +57,6 @@ public class NewMessageBodyBuilder {
     }
 
     public NewMessageBody build() {
-        return new NewMessageBody(text, attachments.build(), link);
+        return new NewMessageBody(text, attachments == null ? null : attachments.build(), link);
     }
 }

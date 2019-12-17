@@ -6,7 +6,7 @@ package chat.tamtam.bot.exceptions;
 public class WebhookException extends Exception {
     private final int errorCode;
 
-    WebhookException(int errorCode, String message) {
+    public WebhookException(int errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }
@@ -16,8 +16,17 @@ public class WebhookException extends Exception {
         this.errorCode = errorCode;
     }
 
+    private WebhookException(int errorCode, Throwable throwable) {
+        super(throwable);
+        this.errorCode = errorCode;
+    }
+
     public static WebhookException internalServerError(String message) {
         return new WebhookException(503, message);
+    }
+
+    public static WebhookException internalServerError(Throwable e) {
+        return new WebhookException(503, e);
     }
 
     public static WebhookException internalServerError(String message, Exception exception) {

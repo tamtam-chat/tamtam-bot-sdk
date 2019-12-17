@@ -1,30 +1,23 @@
 package chat.tamtam.bot.longpolling;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import chat.tamtam.bot.Randoms;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
-import chat.tamtam.botapi.model.GetSubscriptionsResult;
 import chat.tamtam.botapi.model.Update;
 import chat.tamtam.botapi.model.UpdateList;
-import chat.tamtam.botapi.queries.GetSubscriptionsQuery;
 import chat.tamtam.botapi.queries.GetUpdatesQuery;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author alexandrchuprin

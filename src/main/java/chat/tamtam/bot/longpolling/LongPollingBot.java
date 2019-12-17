@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.TamTamBot;
+import chat.tamtam.bot.TamTamBotBase;
 import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
@@ -23,23 +24,17 @@ import chat.tamtam.botapi.queries.UnsubscribeQuery;
 /**
  * @author alexandrchuprin
  */
-public abstract class LongPollingBot implements TamTamBot {
+public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Thread poller;
-    private final TamTamClient client;
     private final LongPollingBotOptions options;
     private volatile boolean isStopped;
 
     public LongPollingBot(TamTamClient client, LongPollingBotOptions options) {
+        super(client);
         this.poller = new Thread(this::poll, "tamtam-bot-poller-" + Objects.hashCode(this));
-        this.client = client;
         this.options = options;
-    }
-
-    @Override
-    public TamTamClient getClient() {
-        return client;
     }
 
     public void start() throws TamTamBotException {
@@ -64,7 +59,7 @@ public abstract class LongPollingBot implements TamTamBot {
     }
 
     protected UpdateList pollOnce(Long marker) throws APIException, ClientException {
-        return new GetUpdatesQuery(client)
+        return new GetUpdatesQuery(getClient())
                 .marker(marker)
                 .timeout(options.getRequestTimeout())
                 .types(options.getUpdateTypes())
@@ -75,7 +70,7 @@ public abstract class LongPollingBot implements TamTamBot {
     private void checkWebhook() throws APIException, ClientException {
         List<Subscription> subscriptions;
         try {
-            subscriptions = new GetSubscriptionsQuery(client).execute().getSubscriptions();
+            subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
         } catch (APIException | ClientException e) {
             LOG.error("Failed to check bot subscription", e);
             return;
@@ -92,7 +87,7 @@ public abstract class LongPollingBot implements TamTamBot {
         }
 
         for (Subscription subscription : subscriptions) {
-            new UnsubscribeQuery(client, subscription.getUrl()).execute();
+            new UnsubscribeQuery(getClient(), subscription.getUrl()).execute();
         }
     }
 
