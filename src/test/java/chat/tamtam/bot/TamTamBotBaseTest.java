@@ -38,7 +38,7 @@ public class TamTamBotBaseTest {
     }
 
     @Test
-    public void shouldHandleUpdate() throws Exception {
+    public void shouldHandleUpdate() {
         Message message = mock(Message.class);
         Update update = new MessageCreatedUpdate(message, 1L);
         Object response = testBot.onUpdate(update);
@@ -47,7 +47,7 @@ public class TamTamBotBaseTest {
     }
 
     @Test
-    public void shouldHandleUpdateReturnNoResponse() throws Exception {
+    public void shouldHandleUpdateReturnNoResponse() {
         Update update = new BotStartedUpdate(1L, mock(User.class), 1L);
         Object response = testBot.onUpdate(update);
         testBot.verify();
@@ -55,7 +55,7 @@ public class TamTamBotBaseTest {
     }
 
     @Test
-    public void shouldReturnAnyResponse() throws Exception {
+    public void shouldReturnAnyResponse() {
         Update update = new MessageRemovedUpdate("asd", 1L, 2L, 3L);
         Object response = testBot.onUpdate(update);
         testBot.verify();
@@ -63,34 +63,53 @@ public class TamTamBotBaseTest {
     }
 
     @Test
-    public void shouldNotHandleUpdate() throws Exception {
+    public void shouldNotHandleUpdate() {
         Update update = new MessageEditedUpdate(mock(Message.class), 1L);
         Object response = testBot.onUpdate(update);
         assertThat(response, is(nullValue()));
     }
 
     @Test
-    public void shouldInvokePrivateMethod() throws Exception {
+    public void shouldInvokePrivateMethod() {
         BotWithPrivateMethod bot = new BotWithPrivateMethod(client);
         Update update = new MessageCreatedUpdate(mock(Message.class), 1L);
         Object response = bot.onUpdate(update);
         assertThat(response, is(mockResponse));
     }
 
-    @Test
-    public void shouldNotInvokeMethodWithManyArgs() throws Exception {
-        InvalidBot2 bot = new InvalidBot2(client);
-        Update update = new MessageCreatedUpdate(mock(Message.class), 1L);
-        Object response = bot.onUpdate(update);
-        assertThat(response, is(nullValue()));
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotInvokeMethodWithManyArgs() {
+        new InvalidBot2(client);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotInvokeMethodWithNonUpdateArg() {
+        new InvalidBot3(client);
     }
 
     @Test
-    public void shouldNotInvokeMethodWithNonUpdateArg() throws Exception {
-        InvalidBot3 bot = new InvalidBot3(client);
-        Update update = new MessageCreatedUpdate(mock(Message.class), 1L);
-        Object response = bot.onUpdate(update);
-        assertThat(response, is(nullValue()));
+    public void shouldRegisterHandlers() {
+        AtomicBoolean handled = new AtomicBoolean();
+        AtomicBoolean handled2 = new AtomicBoolean();
+        Object handler1 = new Object() {
+            @UpdateHandler
+            public void handle(MessageCreatedUpdate update) {
+                handled.compareAndSet(false, true);
+            }
+        };
+
+        Object handler2 = new Object() {
+            @UpdateHandler
+            public void handle(MessageEditedUpdate update) {
+                handled2.compareAndSet(false, true);
+            }
+        };
+
+        TamTamBot bot = new TamTamBotBase(client, handler1, handler2);
+        bot.onUpdate(new MessageCreatedUpdate(mock(Message.class), System.currentTimeMillis()));
+        bot.onUpdate(new MessageEditedUpdate(mock(Message.class), System.currentTimeMillis()));
+        assertThat(handled.get(), is(true));
+        assertThat(handled2.get(), is(true));
     }
 
     private class TestBot extends TamTamBotBase {

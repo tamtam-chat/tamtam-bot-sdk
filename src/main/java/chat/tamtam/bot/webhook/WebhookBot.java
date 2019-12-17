@@ -26,8 +26,8 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
 
     private final WebhookBotOptions options;
 
-    public WebhookBot(TamTamClient client, WebhookBotOptions options) {
-        super(client);
+    public WebhookBot(TamTamClient client, WebhookBotOptions options, Object... handlers) {
+        super(client, handlers);
         this.options = options;
     }
 

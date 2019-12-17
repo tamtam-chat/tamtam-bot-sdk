@@ -26,10 +26,14 @@ public class TamTamBotBase implements TamTamBot {
     private final TamTamClient client;
     private final Map<Class<? extends Update>, MethodHandle> updateHandlers;
 
-    protected TamTamBotBase(TamTamClient client) {
+    protected TamTamBotBase(TamTamClient client, Object... handlers) {
         this.client = client;
         this.updateHandlers = new HashMap<>();
-        addUpdateHandlers();
+
+        addUpdateHandlers(this);
+        for (Object handler : handlers) {
+            addUpdateHandlers(handler);
+        }
     }
 
     @Override
@@ -53,10 +57,10 @@ public class TamTamBotBase implements TamTamBot {
         }
     }
 
-    private void addUpdateHandlers() {
+    private void addUpdateHandlers(Object handler) {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         ArrayList<Class> supers = new ArrayList<>(4);
-        for (Class<?> cls = getClass(); cls != Object.class; cls = cls.getSuperclass()) {
+        for (Class<?> cls = handler.getClass(); cls != Object.class; cls = cls.getSuperclass()) {
             supers.add(cls);
         }
 
@@ -81,14 +85,14 @@ public class TamTamBotBase implements TamTamBot {
 
                 Parameter[] parameters = m.getParameters();
                 if (parameters.length > 1) {
-                    LOG.warn("Method {} should only have 1 parameter of type Update", m);
-                    continue;
+                    throw new IllegalArgumentException(
+                            "Method " + m + " must only have single parameter of type `Update`");
                 }
 
                 Class<?> parameterType = m.getParameterTypes()[0];
                 if (!Update.class.isAssignableFrom(parameterType)) {
-                    LOG.warn("Method {} should only have 1 parameter of type Update", m);
-                    continue;
+                    throw new IllegalArgumentException(
+                            "Method " + m + " must have only single parameter of type `Update`");
                 }
 
                 MethodHandle mh;
@@ -105,7 +109,10 @@ public class TamTamBotBase implements TamTamBot {
 
                 @SuppressWarnings("unchecked")
                 Class<? extends Update> updateClass = (Class<? extends Update>) parameterType;
-                updateHandlers.put(updateClass, mh.bindTo(this));
+                MethodHandle prev = updateHandlers.put(updateClass, mh.bindTo(handler));
+                if (prev != null) {
+                    LOG.warn("Method {} overrides already existing handler for update type {}", m, updateClass);
+                }
             }
         }
     }

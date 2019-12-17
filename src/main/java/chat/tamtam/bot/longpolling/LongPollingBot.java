@@ -31,8 +31,8 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
     private final LongPollingBotOptions options;
     private volatile boolean isStopped;
 
-    public LongPollingBot(TamTamClient client, LongPollingBotOptions options) {
-        super(client);
+    public LongPollingBot(TamTamClient client, LongPollingBotOptions options, Object... handlers) {
+        super(client, handlers);
         this.poller = new Thread(this::poll, "tamtam-bot-poller-" + Objects.hashCode(this));
         this.options = options;
     }
