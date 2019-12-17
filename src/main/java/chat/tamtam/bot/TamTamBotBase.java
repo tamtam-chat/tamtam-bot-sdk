@@ -26,7 +26,7 @@ public class TamTamBotBase implements TamTamBot {
     private final TamTamClient client;
     private final Map<Class<? extends Update>, MethodHandle> updateHandlers;
 
-    protected TamTamBotBase(TamTamClient client, Object... handlers) {
+    public TamTamBotBase(TamTamClient client, Object... handlers) {
         this.client = client;
         this.updateHandlers = new HashMap<>();
 
