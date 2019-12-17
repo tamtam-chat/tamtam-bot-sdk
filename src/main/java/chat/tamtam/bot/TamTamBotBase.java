@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import chat.tamtam.bot.annotations.OnUpdate;
+import chat.tamtam.bot.annotations.UpdateHandler;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.model.Update;
 
@@ -24,7 +24,7 @@ public class TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final TamTamClient client;
-    private final Map<String, MethodHandle> updateHandlers;
+    private final Map<Class<? extends Update>, MethodHandle> updateHandlers;
 
     protected TamTamBotBase(TamTamClient client) {
         this.client = client;
@@ -40,7 +40,7 @@ public class TamTamBotBase implements TamTamBot {
     @Nullable
     @Override
     public Object onUpdate(Update update) {
-        MethodHandle handler = updateHandlers.get(update.getType());
+        MethodHandle handler = updateHandlers.get(update.getClass());
         if (handler == null) {
             return null;
         }
@@ -74,7 +74,7 @@ public class TamTamBotBase implements TamTamBot {
             for (Method m : cls.getDeclaredMethods()) {
                 m.setAccessible(true);
 
-                OnUpdate annotation = m.getAnnotation(OnUpdate.class);
+                UpdateHandler annotation = m.getAnnotation(UpdateHandler.class);
                 if (annotation == null) {
                     continue;
                 }
@@ -103,7 +103,9 @@ public class TamTamBotBase implements TamTamBot {
                     mh = MethodHandles.filterReturnValue(mh, nullResponseMH);
                 }
 
-                updateHandlers.put(annotation.value(), mh.bindTo(this));
+                @SuppressWarnings("unchecked")
+                Class<? extends Update> updateClass = (Class<? extends Update>) parameterType;
+                updateHandlers.put(updateClass, mh.bindTo(this));
             }
         }
     }

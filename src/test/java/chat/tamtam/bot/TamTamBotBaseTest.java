@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
 
-import chat.tamtam.bot.annotations.OnUpdate;
+import chat.tamtam.bot.annotations.UpdateHandler;
 import chat.tamtam.bot.builders.NewMessageBodyBuilder;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.model.BotStartedUpdate;
@@ -71,7 +71,7 @@ public class TamTamBotBaseTest {
 
     @Test
     public void shouldInvokePrivateMethod() throws Exception {
-        InvalidBot1 bot = new InvalidBot1(client);
+        BotWithPrivateMethod bot = new BotWithPrivateMethod(client);
         Update update = new MessageCreatedUpdate(mock(Message.class), 1L);
         Object response = bot.onUpdate(update);
         assertThat(response, is(mockResponse));
@@ -101,18 +101,18 @@ public class TamTamBotBaseTest {
             this.handled = new AtomicBoolean();
         }
 
-        @OnUpdate(Update.MESSAGE_CREATED)
+        @UpdateHandler
         public void onMessageCreated(MessageCreatedUpdate update) {
             signal();
         }
 
-        @OnUpdate(Update.BOT_STARTED)
+        @UpdateHandler
         public Object onBotStarted(BotStartedUpdate update) {
             signal();
             return null;
         }
 
-        @OnUpdate(Update.MESSAGE_REMOVED)
+        @UpdateHandler
         public NewMessageBody onMessageRemoved(MessageRemovedUpdate update) {
             signal();
             return mockResponse;
@@ -129,12 +129,12 @@ public class TamTamBotBaseTest {
         }
     }
 
-    private class InvalidBot1 extends TamTamBotBase {
-        InvalidBot1(TamTamClient client) {
+    private class BotWithPrivateMethod extends TamTamBotBase {
+        BotWithPrivateMethod(TamTamClient client) {
             super(client);
         }
 
-        @OnUpdate(Update.MESSAGE_CREATED)
+        @UpdateHandler
         private NewMessageBody onMessageCreated(MessageCreatedUpdate update) {
             return mockResponse;
         }
@@ -145,8 +145,9 @@ public class TamTamBotBaseTest {
             super(client);
         }
 
-        @OnUpdate(Update.MESSAGE_CREATED)
+        @UpdateHandler
         public NewMessageBody onMessageCreated(MessageCreatedUpdate update, Object arg2) {
+            fail();
             return mockResponse;
         }
     }
@@ -156,8 +157,9 @@ public class TamTamBotBaseTest {
             super(client);
         }
 
-        @OnUpdate(Update.MESSAGE_CREATED)
+        @UpdateHandler
         public NewMessageBody onMessageCreated(Object arg) {
+            fail();
             return mockResponse;
         }
     }
