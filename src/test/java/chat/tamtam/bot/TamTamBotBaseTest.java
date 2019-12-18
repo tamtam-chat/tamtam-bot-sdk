@@ -5,11 +5,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
 
+import chat.tamtam.bot.annotations.CommandHandler;
 import chat.tamtam.bot.annotations.UpdateHandler;
 import chat.tamtam.bot.builders.NewMessageBodyBuilder;
+import chat.tamtam.bot.chat.CommandLine;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.model.BotStartedUpdate;
 import chat.tamtam.botapi.model.Message;
+import chat.tamtam.botapi.model.MessageBody;
 import chat.tamtam.botapi.model.MessageCreatedUpdate;
 import chat.tamtam.botapi.model.MessageEditedUpdate;
 import chat.tamtam.botapi.model.MessageRemovedUpdate;
@@ -18,10 +21,12 @@ import chat.tamtam.botapi.model.Update;
 import chat.tamtam.botapi.model.User;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author alexandrchuprin
@@ -40,6 +45,9 @@ public class TamTamBotBaseTest {
     @Test
     public void shouldHandleUpdate() {
         Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("text");
+        when(message.getBody()).thenReturn(body);
         Update update = new MessageCreatedUpdate(message, 1L);
         Object response = testBot.onUpdate(update);
         testBot.verify();
@@ -88,6 +96,54 @@ public class TamTamBotBaseTest {
     }
 
     @Test
+    public void shouldHandleCommand() {
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command1 arg");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = testBot.onUpdate(update);
+        testBot.verify();
+        assertThat(response, is(new CommandLine("command1", new String[]{"arg"})));
+    }
+
+    @Test
+    public void shouldHandleCommand2() {
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command2 arg arg2");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = testBot.onUpdate(update);
+        testBot.verify();
+        assertThat(response, is(new CommandLine("command2", new String[]{"arg", "arg2"})));
+    }
+
+    @Test
+    public void shouldHandleAsUpdate() {
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/notcommand arg");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        CommandTestBot bot = new CommandTestBot(client);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(update));
+    }
+
+    @Test
+    public void shouldHandleAsUpdate2() {
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        CommandTestBot bot = new CommandTestBot(client);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(update));
+    }
+
+    @Test
     public void shouldRegisterHandlers() {
         AtomicBoolean handled = new AtomicBoolean();
         AtomicBoolean handled2 = new AtomicBoolean();
@@ -122,19 +178,45 @@ public class TamTamBotBaseTest {
 
         @UpdateHandler
         public void onMessageCreated(MessageCreatedUpdate update) {
+            assertThat(update, is(notNullValue()));
             signal();
         }
 
         @UpdateHandler
         public Object onBotStarted(BotStartedUpdate update) {
+            assertThat(update, is(notNullValue()));
             signal();
             return null;
         }
 
         @UpdateHandler
         public NewMessageBody onMessageRemoved(MessageRemovedUpdate update) {
+            assertThat(update, is(notNullValue()));
             signal();
             return mockResponse;
+        }
+
+        @CommandHandler("command1")
+        public CommandLine onCommand1(Message message, CommandLine commandLine) {
+            assertThat(commandLine, is(notNullValue()));
+            assertThat(message, is(notNullValue()));
+            signal();
+            return commandLine;
+        }
+
+        @CommandHandler("command2")
+        public CommandLine onCommand2(Message message, CommandLine commandLine) {
+            assertThat(commandLine, is(notNullValue()));
+            assertThat(message, is(notNullValue()));
+            signal();
+            return commandLine;
+        }
+
+        @CommandHandler("command3")
+        public void onCommand3(Message message, CommandLine commandLine) {
+            assertThat(commandLine, is(notNullValue()));
+            assertThat(message, is(notNullValue()));
+            signal();
         }
 
         private void signal() {
@@ -182,4 +264,21 @@ public class TamTamBotBaseTest {
             return mockResponse;
         }
     }
+
+    private class CommandTestBot extends TamTamBotBase {
+        CommandTestBot(TamTamClient client) {
+            super(client);
+        }
+
+        @UpdateHandler
+        public MessageCreatedUpdate onMessageCreated(MessageCreatedUpdate update) {
+            return update;
+        }
+
+        @CommandHandler("command")
+        public void onCommand(Message message, CommandLine line) {
+            fail();
+        }
+    }
+
 }
