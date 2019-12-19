@@ -12,8 +12,8 @@ public class CommandLineParser {
     private static final String[] NO_ARGS = new String[0];
 
     @Nullable
-    public static CommandLine tryParse(String line) {
-        if (line == null || line.trim().isEmpty()) {
+    public static RawCommandLine parseRaw(String line) {
+        if (line == null || line.isEmpty()) {
             return null;
         }
 
@@ -29,16 +29,29 @@ public class CommandLineParser {
 
         int firstSpace = trimmedLine.indexOf(' ');
         if (firstSpace == -1) {
-            return new CommandLine(trimmedLine, NO_ARGS);
+            return new RawCommandLine(trimmedLine, "");
         }
 
         String commandKey = trimmedLine.substring(0, firstSpace);
-        String[] args = parseArgs(trimmedLine.substring(firstSpace + 1));
-
-        return new CommandLine(commandKey, args);
+        String tail = trimmedLine.substring(firstSpace + 1);
+        return new RawCommandLine(commandKey, tail);
     }
 
-    private static String[] parseArgs(String argsString) {
+    @Nullable
+    public static CommandLine tryParse(String line) {
+        RawCommandLine raw = parseRaw(line);
+        if (raw == null) {
+            return null;
+        }
+
+        return new CommandLine(raw.getKey(), parseArgs(raw.getTail()));
+    }
+
+    public static String[] parseArgs(String argsString) {
+        if (argsString == null || argsString.isEmpty()) {
+            return NO_ARGS;
+        }
+
         List<String> args = new ArrayList<>();
         StringBuilder argBuilder = new StringBuilder();
         boolean escaped = false;

@@ -20,6 +20,10 @@ public class CommandLine {
         this.args = Objects.requireNonNull(args, "args");
     }
 
+    public static CommandLine fromRaw(RawCommandLine rawCommandLine) {
+        return new CommandLine(rawCommandLine.getKey(), CommandLineParser.parseArgs(rawCommandLine.getTail()));
+    }
+
     public String getKey() {
         return key;
     }

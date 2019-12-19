@@ -104,7 +104,7 @@ public class TamTamBotBaseTest {
         Update update = new MessageCreatedUpdate(message, 1L);
         Object response = testBot.onUpdate(update);
         testBot.verify();
-        assertThat(response, is(new CommandLine("command1", new String[]{"arg"})));
+        assertThat(response, is("arg"));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class TamTamBotBaseTest {
         Update update = new MessageCreatedUpdate(message, 1L);
         Object response = testBot.onUpdate(update);
         testBot.verify();
-        assertThat(response, is(new CommandLine("command2", new String[]{"arg", "arg2"})));
+        assertThat(response, is("arg"));
     }
 
     @Test
@@ -168,6 +168,76 @@ public class TamTamBotBaseTest {
         assertThat(handled2.get(), is(true));
     }
 
+    @Test
+    public void shouldParseArgs() {
+        ArgsTestBot bot = new ArgsTestBot(client);
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command arg1 arg2");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(new String[]{"arg1", "arg2"}));
+    }
+
+    @Test
+    public void shouldParseArgs2() {
+        ArgsTestBot bot = new ArgsTestBot(client);
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command arg1");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(new String[]{"arg1", null}));
+    }
+
+    @Test
+    public void shouldParseArgs3() {
+        ArgsTestBot bot = new ArgsTestBot(client);
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command arg1 arg2 arg3");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(new String[]{"arg1", "arg2"}));
+    }
+
+    @Test
+    public void shouldNotParseArgs() {
+        ArgsTestBot bot = new ArgsTestBot(client);
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/commandWithoutArgs arg1 arg2 arg3");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is("arg1 arg2 arg3"));
+    }
+
+    @Test
+    public void shouldNotParseArgs2() {
+        ArgsTestBot bot = new ArgsTestBot(client);
+        Message message = mock(Message.class);
+        MessageBody body = mock(MessageBody.class);
+        when(body.getText()).thenReturn("/command2");
+        when(message.getBody()).thenReturn(body);
+        Update update = new MessageCreatedUpdate(message, 1L);
+        Object response = bot.onUpdate(update);
+        assertThat(response, is(message));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotCreateBotWithInvalidCommand() {
+        new InvalidBot4(client);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotCreateBotWithInvalidCommand2() {
+        new InvalidBot5(client);
+    }
+
     private class TestBot extends TamTamBotBase {
         private final AtomicBoolean handled;
 
@@ -197,19 +267,19 @@ public class TamTamBotBaseTest {
         }
 
         @CommandHandler("command1")
-        public CommandLine onCommand1(Message message, CommandLine commandLine) {
-            assertThat(commandLine, is(notNullValue()));
+        public String onCommand1(Message message, String arg) {
+            assertThat(arg, is(notNullValue()));
             assertThat(message, is(notNullValue()));
             signal();
-            return commandLine;
+            return arg;
         }
 
         @CommandHandler("command2")
-        public CommandLine onCommand2(Message message, CommandLine commandLine) {
-            assertThat(commandLine, is(notNullValue()));
+        public String onCommand2(Message message, String arg) {
+            assertThat(arg, is(notNullValue()));
             assertThat(message, is(notNullValue()));
             signal();
-            return commandLine;
+            return arg;
         }
 
         @CommandHandler("command3")
@@ -265,6 +335,30 @@ public class TamTamBotBaseTest {
         }
     }
 
+    private class InvalidBot4 extends TamTamBotBase {
+        InvalidBot4(TamTamClient client) {
+            super(client);
+        }
+
+        @CommandHandler("/")
+        public NewMessageBody onMessageCreated(Object arg) {
+            fail();
+            return mockResponse;
+        }
+    }
+
+    private class InvalidBot5 extends TamTamBotBase {
+        InvalidBot5(TamTamClient client) {
+            super(client);
+        }
+
+        @CommandHandler("")
+        public NewMessageBody onMessageCreated(Object arg) {
+            fail();
+            return mockResponse;
+        }
+    }
+
     private class CommandTestBot extends TamTamBotBase {
         CommandTestBot(TamTamClient client) {
             super(client);
@@ -276,8 +370,34 @@ public class TamTamBotBaseTest {
         }
 
         @CommandHandler("command")
-        public void onCommand(Message message, CommandLine line) {
+        public void onCommand(Message message, String arg1, String arg2) {
             fail();
+        }
+    }
+
+    private class ArgsTestBot extends TamTamBotBase {
+        ArgsTestBot(TamTamClient client) {
+            super(client);
+        }
+
+        @UpdateHandler
+        public MessageCreatedUpdate onMessageCreated(MessageCreatedUpdate update) {
+            return update;
+        }
+
+        @CommandHandler("command")
+        public String[] onCommand(Message message, String arg1, String arg2) {
+            return new String[]{arg1, arg2};
+        }
+
+        @CommandHandler("command2")
+        public Message onCommand(Message message) {
+            return message;
+        }
+
+        @CommandHandler(value = "commandWithoutArgs", parseArgs = false)
+        public String onCommand(Message message, String tail) {
+            return tail;
         }
     }
 
