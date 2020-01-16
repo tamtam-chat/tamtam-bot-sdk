@@ -10,7 +10,7 @@ import chat.tamtam.bot.TamTamBotOptions;
  * @author alexandrchuprin
  */
 public class LongPollingBotOptions extends TamTamBotOptions {
-    public static final LongPollingBotOptions DEFAULT = new LongPollingBotOptions(30, null, null, false);
+    public static final LongPollingBotOptions DEFAULT = new LongPollingBotOptions(30, null, null, true);
 
     private final int requestTimeout;
     private final Integer limit;

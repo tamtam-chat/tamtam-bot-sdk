@@ -2,7 +2,6 @@ package chat.tamtam.bot.longpolling;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -24,16 +23,23 @@ import chat.tamtam.botapi.queries.UnsubscribeQuery;
 /**
  * @author alexandrchuprin
  */
-public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot {
+public class LongPollingBot extends TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Thread poller;
     private final LongPollingBotOptions options;
-    private volatile boolean isStopped;
+
+    public LongPollingBot(String accessToken, Object... handlers) {
+        this(accessToken, LongPollingBotOptions.DEFAULT, handlers);
+    }
+
+    public LongPollingBot(String accessToken, LongPollingBotOptions options, Object... handlers) {
+        this(TamTamClient.create(accessToken), options, handlers);
+    }
 
     public LongPollingBot(TamTamClient client, LongPollingBotOptions options, Object... handlers) {
         super(client, handlers);
-        this.poller = new Thread(this::poll, "tamtam-bot-poller-" + Objects.hashCode(this));
+        this.poller = new Thread(this::poll, "tamtam-bot-poller-" + getClass().getSimpleName());
         this.options = options;
     }
 
@@ -41,20 +47,29 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
         try {
             checkWebhook();
         } catch (Exception e) {
-            throw new TamTamBotException(e.getMessage(), e);
+            throw new TamTamBotException("Failed to check webhook subscription", e);
         }
 
         poller.start();
     }
 
-    public void stop() throws InterruptedException {
-        isStopped = true;
-        poller.join();
+    public void stop() {
+        poller.interrupt();
+
+        try {
+            poller.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     protected void handleUpdates(List<Update> updates) {
         for (Update update : updates) {
-            onUpdate(update);
+            try {
+                onUpdate(update);
+            } catch (Exception e) {
+                LOG.error("Failed to handle update: {}", update, e);
+            }
         }
     }
 
@@ -68,22 +83,17 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
     }
 
     private void checkWebhook() throws APIException, ClientException {
-        List<Subscription> subscriptions;
-        try {
-            subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
-        } catch (APIException | ClientException e) {
-            LOG.error("Failed to check bot subscription", e);
-            return;
-        }
-
+        List<Subscription> subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
         if (subscriptions.isEmpty()) {
             return;
         }
 
         if (!options.shouldRemoveWebhook()) {
-            throw new IllegalStateException(String.format("Bot %s has webhook subscriptions: %s. " +
+            LOG.warn("Bot {} has webhook subscriptions: {}. " +
                     "Long polling will not receive updates in this case." +
-                    "Remove it manually or set `shouldRemoveWebhook` to `true` in options.", this, subscriptions));
+                    "Remove it manually or set `shouldRemoveWebhook` to `true` in options.", this, subscriptions);
+
+            return;
         }
 
         for (Subscription subscription : subscriptions) {
@@ -94,7 +104,7 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
     private void poll() {
         Long marker = null;
         int error = 0;
-        while (!isStopped) {
+        while (true) {
             UpdateList updateList;
             try {
                 updateList = pollOnce(marker);
@@ -106,7 +116,7 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
                 }
 
                 error = Math.min(++error, 5);
-                LOG.error("Failed to get updates with marker {}. Will retry in {} seconds…", marker, error, e);
+                LOG.error("Failed to get updates with marker {}. Will retry in {} second(s)…", marker, error, e);
 
                 try {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(error));
@@ -118,7 +128,14 @@ public abstract class LongPollingBot extends TamTamBotBase implements TamTamBot 
                 continue;
             }
 
-            handleUpdates(updateList.getUpdates());
+            if (Thread.currentThread().isInterrupted()) {
+                // Bot is stopped, will not handle updates
+                break;
+            }
+
+            List<Update> updates = updateList.getUpdates();
+            handleUpdates(updates);
+
             marker = updateList.getMarker();
         }
 

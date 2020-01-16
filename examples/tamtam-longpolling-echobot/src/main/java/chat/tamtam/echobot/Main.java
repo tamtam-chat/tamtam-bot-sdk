@@ -1,7 +1,7 @@
 package chat.tamtam.echobot;
 
+import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.longpolling.LongPollingBot;
-import chat.tamtam.botapi.TamTamBotAPI;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -21,11 +21,19 @@ public class Main {
         }
 
         String accessToken = OPTIONS.accessToken.value(optionSet);
-        TamTamBotAPI api = TamTamBotAPI.create(accessToken);
-        LongPollingBot bot = new EchoBot(api);
+        LongPollingBot bot = new EchoBot(accessToken);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(bot::stop));
-        bot.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Stopping bot…");
+            bot.stop();
+        }));
+
+        try {
+            bot.start();
+        } catch (TamTamBotException e) {
+            System.err.println("Failed to start bot: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     private static class Options extends OptionParser {

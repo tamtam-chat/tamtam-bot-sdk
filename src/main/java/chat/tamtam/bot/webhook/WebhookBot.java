@@ -13,6 +13,7 @@ import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
+import chat.tamtam.botapi.model.SimpleQueryResult;
 import chat.tamtam.botapi.model.Subscription;
 import chat.tamtam.botapi.model.SubscriptionRequestBody;
 import chat.tamtam.botapi.queries.GetSubscriptionsQuery;
@@ -22,11 +23,19 @@ import chat.tamtam.botapi.queries.UnsubscribeQuery;
 /**
  * @author alexandrchuprin
  */
-public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
+public class WebhookBot extends TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final WebhookBotOptions options;
     private final AtomicBoolean running = new AtomicBoolean();
+
+    public WebhookBot(String accessToken, Object... handlers) {
+        this(accessToken, WebhookBotOptions.DEFAULT, handlers);
+    }
+
+    public WebhookBot(String accessToken, WebhookBotOptions options, Object... handlers) {
+        this(TamTamClient.create(accessToken), options, handlers);
+    }
 
     public WebhookBot(TamTamClient client, WebhookBotOptions options, Object... handlers) {
         super(client, handlers);
@@ -43,7 +52,7 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
 
         if (options.shouldRemoveOldSubscriptions()) {
             try {
-                unsubscribe();
+                unsubscribeAll();
             } catch (APIException | ClientException e) {
                 LOG.warn("Failed to remove current subscriptions", e);
             }
@@ -62,8 +71,11 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
         return webhookUrl;
     }
 
-    public void stop(WebhookBotContainer container) {
-        running.compareAndSet(true, false);
+    /**
+     * @return false if bot is not running
+     */
+    public boolean stop(WebhookBotContainer container) {
+        return running.compareAndSet(true, false);
     }
 
     /**
@@ -77,10 +89,13 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
         return running.get();
     }
 
-    private void unsubscribe() throws APIException, ClientException {
+    private void unsubscribeAll() throws APIException, ClientException {
         List<Subscription> subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
         for (Subscription subscription : subscriptions) {
-            new UnsubscribeQuery(getClient(), subscription.getUrl()).execute();
+            SimpleQueryResult result = new UnsubscribeQuery(getClient(), subscription.getUrl()).execute();
+            if (!result.isSuccess()) {
+                LOG.warn("Failed to remove subscription {}. Reason: {}", subscription.getUrl(), result.getMessage());
+            }
         }
     }
 }

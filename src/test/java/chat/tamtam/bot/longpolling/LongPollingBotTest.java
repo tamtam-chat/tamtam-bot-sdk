@@ -1,39 +1,57 @@
 package chat.tamtam.bot.longpolling;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import chat.tamtam.bot.Randoms;
 import chat.tamtam.botapi.client.TamTamClient;
+import chat.tamtam.botapi.client.TamTamSerializer;
+import chat.tamtam.botapi.client.TamTamTransportClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
+import chat.tamtam.botapi.model.GetSubscriptionsResult;
 import chat.tamtam.botapi.model.Update;
 import chat.tamtam.botapi.model.UpdateList;
+import chat.tamtam.botapi.queries.GetSubscriptionsQuery;
 import chat.tamtam.botapi.queries.GetUpdatesQuery;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author alexandrchuprin
  */
+@RunWith(MockitoJUnitRunner.class)
 public class LongPollingBotTest {
+    @Mock
+    private TamTamTransportClient transportClient;
+    @Mock
+    private TamTamSerializer serializer;
+
     private TamTamClient client;
 
     @Before
     public void setUp() {
-        client = mock(TamTamClient.class);
+        client = new TamTamClient("token", transportClient, serializer);
     }
 
     @Test
     public void shouldHandleUpdates() throws Exception {
 //        List<Update> updates = Stream.generate(Randoms::randomUpdate).limit(945).collect(Collectors.toList());
-//        when(client.getUpdates()).thenAnswer(i -> new MockGetUpdatesQuery(updates));
+//        when(transportClient..g).thenAnswer(i -> new MockGetUpdatesQuery(updates));
 //
 //        GetSubscriptionsQuery getSubsQuery = mock(GetSubscriptionsQuery.class);
 //        when(getSubsQuery.execute()).thenReturn(new GetSubscriptionsResult(Collections.emptyList()));

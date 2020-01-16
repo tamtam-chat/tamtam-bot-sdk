@@ -57,6 +57,10 @@ public class TamTamBotBase implements TamTamBot {
         }
     };
 
+    public TamTamBotBase(String accessToken, Object... handlers) {
+        this(TamTamClient.create(accessToken), handlers);
+    }
+
     public TamTamBotBase(TamTamClient client, Object... handlers) {
         this.client = client;
         this.updateHandlers = new HashMap<>();
