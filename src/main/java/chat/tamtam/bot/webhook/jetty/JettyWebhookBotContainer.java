@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.exceptions.BotNotFoundException;
-import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
 import chat.tamtam.bot.webhook.WebhookBot;
 import chat.tamtam.bot.webhook.WebhookBotContainerBase;
@@ -47,21 +46,26 @@ public class JettyWebhookBotContainer extends WebhookBotContainerBase {
     }
 
     @Override
-    public void start() throws TamTamBotException {
+    public void start() {
         try {
             server.start();
         } catch (Exception e) {
-            throw new TamTamBotException(e);
+            LOG.error("Failed to start webhook server", e);
+            return;
         }
 
         super.start();
     }
 
     @Override
-    public void stop() throws Exception {
-        server.stop();
-        server.join();
-        super.stop();
+    public void stop() {
+        try {
+            server.stop();
+            server.join();
+            super.stop();
+        } catch (Exception e) {
+            LOG.error("Failed to stop webhook server", e);
+        }
     }
 
     @NotNull

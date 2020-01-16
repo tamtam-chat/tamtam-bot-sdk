@@ -2,6 +2,7 @@ package chat.tamtam.bot.webhook;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final WebhookBotOptions options;
+    private final AtomicBoolean running = new AtomicBoolean();
 
     public WebhookBot(TamTamClient client, WebhookBotOptions options, Object... handlers) {
         super(client, handlers);
@@ -35,6 +37,10 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
      * @return registered webhook URL
      */
     public String start(WebhookBotContainer container) throws TamTamBotException {
+        if (!running.compareAndSet(false, true)) {
+            return container.getWebhookUrl(this);
+        }
+
         if (options.shouldRemoveOldSubscriptions()) {
             try {
                 unsubscribe();
@@ -57,7 +63,7 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
     }
 
     public void stop(WebhookBotContainer container) {
-        // do nothing by default
+        running.compareAndSet(true, false);
     }
 
     /**
@@ -65,6 +71,10 @@ public abstract class WebhookBot extends TamTamBotBase implements TamTamBot {
      */
     public String getKey() {
         return getClient().getAccessToken();
+    }
+
+    public boolean isRunning() {
+        return running.get();
     }
 
     private void unsubscribe() throws APIException, ClientException {

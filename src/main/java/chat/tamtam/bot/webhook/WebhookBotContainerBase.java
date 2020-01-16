@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.TamTamBot;
 import chat.tamtam.bot.exceptions.BotNotFoundException;
-import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
 import chat.tamtam.botapi.client.TamTamSerializer;
 import chat.tamtam.botapi.exceptions.SerializationException;
@@ -26,19 +25,27 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Map<String, WebhookBot> bots = new ConcurrentHashMap<>();
+    private final Map<WebhookBot, String> reverseLookup = new ConcurrentHashMap<>();
 
     @Override
     public void register(WebhookBot bot) {
-        if (bots.putIfAbsent(getPath(bot), bot) != null) {
+        String path = getPath(bot);
+        if (bots.putIfAbsent(path, bot) != null) {
             throw new IllegalStateException("Bot " + bot + " is already registered");
         }
+
+        reverseLookup.put(bot, path);
     }
 
     @Override
     public void unregister(WebhookBot bot) {
-        if (!bots.remove(getPath(bot), bot)) {
+        String currentPath = reverseLookup.get(bot);
+        if (currentPath == null) {
             throw new IllegalStateException("Bot " + bot + " is not registered");
         }
+
+        reverseLookup.remove(bot, currentPath);
+        bots.remove(currentPath, bot);
     }
 
     @Override
@@ -47,22 +54,26 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     }
 
     @Override
-    public void start() throws TamTamBotException {
+    public void start() {
         for (WebhookBot bot : bots.values()) {
             try {
                 String url = bot.start(this);
                 LOG.info("Bot {} registered webhook URL: {}", bot, url);
-            } catch (TamTamBotException e) {
+            } catch (Exception e) {
                 LOG.error("Failed to start bot {}", bot, e);
             }
         }
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         for (WebhookBot bot : bots.values()) {
-            bot.stop(this);
-            LOG.info("Bot {} stopped", bot);
+            try {
+                bot.stop(this);
+                LOG.info("Bot {} stopped", bot);
+            } catch (Exception e) {
+                LOG.error("Failed to stop bot {}", bot, e);
+            }
         }
     }
 
