@@ -35,7 +35,7 @@ For example, simple bot that just replies on incoming message:
 
 ```java
 public class ReplyBot extends LongPollingBot {
-    public LoggingBot(String accessToken) {
+    public ReplyBot(String accessToken) {
         super(accessToken);
     }
 
@@ -47,7 +47,7 @@ public class ReplyBot extends LongPollingBot {
 }
 ```
 
-All other updates will be ignored. If you want to handle any update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
+All other updates will be ignored. If you want to handle every update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
 
 Alternatively, you can directly create instance of `LongPollingBot` and pass handlers to constructor:
 ```java
@@ -75,7 +75,26 @@ Check out [EchoBot](examples/longpolling-echobot/src/main/java/chat/tamtam/echob
 Webhook subscribed bot requires running HTTP server. By default we use [Jetty](https://www.eclipse.org/jetty/)
 but you can use any server you want.
 
-All webhook bots should be put
+All webhook bots should be put in container that manages server and handle all incoming HTTP-requests to bots:
+
+```java
+WebhookEchoBot bot1 = new WebhookEchoBot("%ACCESS_TOKEN%");
+WebhookBot bot2 = new WebhookBot("%ANOTHER_ACCESS_TOKEN%");
+
+JettyWebhookBotContainer botContainer = new JettyWebhookBotContainer("mysupercoolbot.com", 8080);
+botContainer.register(bot1);
+botContainer.register(bot2);
+
+// Register JVM shutdown hook to stop our server
+Runtime.getRuntime().addShutdownHook(new Thread(botContainer::stop));
+
+// `start` will run underlying Jetty server and register webhook subscription for each bot
+botContainer.start();
+```
+
+Check out [jetty-webhook-echobot](examples/jetty-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
+for more complete example or [tomcat-webhook-echobot](examples/tomcat-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
+as an alternative example of container implementation.
 
 ## Builders
 
