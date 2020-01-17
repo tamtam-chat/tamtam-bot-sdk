@@ -1,4 +1,4 @@
-package chat.tamtam.bot.chat;
+package chat.tamtam.bot.commands;
 
 import java.util.Objects;
 

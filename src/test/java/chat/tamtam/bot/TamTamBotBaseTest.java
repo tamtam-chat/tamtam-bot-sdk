@@ -8,7 +8,7 @@ import org.junit.Test;
 import chat.tamtam.bot.annotations.CommandHandler;
 import chat.tamtam.bot.annotations.UpdateHandler;
 import chat.tamtam.bot.builders.NewMessageBodyBuilder;
-import chat.tamtam.bot.chat.CommandLine;
+import chat.tamtam.bot.commands.CommandLine;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.model.BotStartedUpdate;
 import chat.tamtam.botapi.model.Message;

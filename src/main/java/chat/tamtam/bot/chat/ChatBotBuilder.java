@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import chat.tamtam.bot.commands.Command;
+import chat.tamtam.bot.commands.CommandHandler;
 import chat.tamtam.botapi.model.Message;
 
 /**

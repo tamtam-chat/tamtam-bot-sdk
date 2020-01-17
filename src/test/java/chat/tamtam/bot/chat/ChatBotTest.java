@@ -10,8 +10,7 @@ import java.util.function.Consumer;
 import org.junit.Test;
 
 import chat.tamtam.bot.Mocks;
-import chat.tamtam.bot.chat.ChatBot;
-import chat.tamtam.bot.chat.CommandHandler;
+import chat.tamtam.bot.commands.CommandHandler;
 import chat.tamtam.botapi.model.LocationAttachment;
 import chat.tamtam.botapi.model.Message;
 

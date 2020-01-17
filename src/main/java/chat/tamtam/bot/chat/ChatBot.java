@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import chat.tamtam.bot.commands.CommandHandler;
+import chat.tamtam.bot.commands.CommandLine;
+import chat.tamtam.bot.commands.CommandLineParser;
 import chat.tamtam.botapi.model.Message;
 
 /**

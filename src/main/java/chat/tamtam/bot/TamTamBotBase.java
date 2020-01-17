@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import chat.tamtam.bot.annotations.CommandHandler;
 import chat.tamtam.bot.annotations.UpdateHandler;
-import chat.tamtam.bot.chat.CommandLineParser;
-import chat.tamtam.bot.chat.RawCommandLine;
+import chat.tamtam.bot.commands.CommandLineParser;
+import chat.tamtam.bot.commands.RawCommandLine;
 import chat.tamtam.bot.updates.DefaultUpdateMapper;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.model.Message;

@@ -2,6 +2,9 @@ package chat.tamtam.bot.chat;
 
 import org.junit.Test;
 
+import chat.tamtam.bot.commands.CommandLine;
+import chat.tamtam.bot.commands.CommandLineParser;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
