@@ -1,4 +1,4 @@
-package chat.tamtam.bot.builders;
+package chat.tamtam.bot.builders.attachments;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import chat.tamtam.bot.builders.AttachmentsBuilder;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.UploadedInfo;
 

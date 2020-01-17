@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import chat.tamtam.bot.builders.attachments.AttachmentsBuilder;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.Button;
 import chat.tamtam.botapi.model.CallbackButton;
@@ -17,8 +18,8 @@ import chat.tamtam.botapi.model.NewMessageLink;
 import chat.tamtam.botapi.model.UploadedInfo;
 import chat.tamtam.botapi.model.VideoAttachmentRequest;
 
-import static chat.tamtam.bot.builders.AttachmentsBuilder.inlineKeyboard;
-import static chat.tamtam.bot.builders.InlineKeyboardBuilder.singleRow;
+import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.inlineKeyboard;
+import static chat.tamtam.bot.builders.attachments.InlineKeyboardBuilder.singleRow;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;

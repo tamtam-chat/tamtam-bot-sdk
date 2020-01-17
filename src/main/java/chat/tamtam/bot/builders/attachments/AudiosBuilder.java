@@ -12,7 +12,7 @@ public class AudiosBuilder extends MediaAttachmentBuilder {
         super(infos);
     }
 
-    public AudiosBuilder(String[] tokens) {
+    public AudiosBuilder(String... tokens) {
         super(tokens);
     }
 

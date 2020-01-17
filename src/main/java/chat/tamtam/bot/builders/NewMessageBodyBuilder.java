@@ -1,5 +1,6 @@
 package chat.tamtam.bot.builders;
 
+import chat.tamtam.bot.builders.attachments.AttachmentsBuilder;
 import chat.tamtam.botapi.model.MessageLinkType;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;

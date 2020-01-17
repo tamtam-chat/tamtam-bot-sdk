@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import chat.tamtam.bot.builders.AttachmentsBuilder;
 import chat.tamtam.botapi.model.PhotoAttachmentRequest;
 import chat.tamtam.botapi.model.PhotoAttachmentRequestPayload;
 

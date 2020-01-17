@@ -1,15 +1,10 @@
-package chat.tamtam.bot.builders;
+package chat.tamtam.bot.builders.attachments;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import chat.tamtam.bot.builders.attachments.AudiosBuilder;
-import chat.tamtam.bot.builders.attachments.CopyBuilder;
-import chat.tamtam.bot.builders.attachments.FilesBuilder;
-import chat.tamtam.bot.builders.attachments.PhotosBuilder;
-import chat.tamtam.bot.builders.attachments.VideosBuilder;
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.UploadedInfo;
@@ -48,19 +43,19 @@ public interface AttachmentsBuilder {
     }
 
     static AttachmentsBuilder audios(String... tokens) {
-        return new FilesBuilder(tokens);
-    }
-
-    static AttachmentsBuilder audios(UploadedInfo... uploadedInfos) {
-        return new FilesBuilder(uploadedInfos);
-    }
-
-    static AttachmentsBuilder files(String... tokens) {
         return new AudiosBuilder(tokens);
     }
 
-    static AttachmentsBuilder files(UploadedInfo... uploadedInfos) {
+    static AttachmentsBuilder audios(UploadedInfo... uploadedInfos) {
         return new AudiosBuilder(uploadedInfos);
+    }
+
+    static AttachmentsBuilder files(String... tokens) {
+        return new FilesBuilder(tokens);
+    }
+
+    static AttachmentsBuilder files(UploadedInfo... uploadedInfos) {
+        return new FilesBuilder(uploadedInfos);
     }
 
     static AttachmentsBuilder inlineKeyboard(InlineKeyboardBuilder keyboardBuilder) {
