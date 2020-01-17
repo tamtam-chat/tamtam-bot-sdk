@@ -1,6 +1,5 @@
 package chat.tamtam.bot.webhook;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -9,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import chat.tamtam.bot.TamTamBot;
 import chat.tamtam.bot.exceptions.BotNotFoundException;
+import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
 import chat.tamtam.botapi.client.TamTamSerializer;
 import chat.tamtam.botapi.exceptions.SerializationException;
@@ -55,7 +54,7 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     }
 
     @Override
-    public void start() {
+    public void start() throws TamTamBotException {
         for (WebhookBot bot : bots.values()) {
             try {
                 String url = bot.start(this);
@@ -84,7 +83,7 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
             return "OK";
         }
 
-        TamTamBot bot = bots.get(path);
+        WebhookBot bot = bots.get(path);
         if (bot == null) {
             throw new BotNotFoundException("No bot registered by path: " + path);
         }

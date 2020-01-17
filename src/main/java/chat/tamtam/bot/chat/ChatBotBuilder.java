@@ -24,8 +24,8 @@ public class ChatBotBuilder {
         return this;
     }
 
-    public <T extends CommandHandler & Command> ChatBotBuilder on(T command) {
-        handlers.put(command.getKey(), command);
+    public <T extends CommandHandler & Command> ChatBotBuilder add(T handler) {
+        handlers.put(handler.getKey(), handler);
         return this;
     }
 

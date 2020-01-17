@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.webhook.WebhookBot;
 import chat.tamtam.bot.webhook.WebhookBotContainerBase;
 
@@ -19,30 +20,29 @@ public class JettyWebhookBotContainer extends WebhookBotContainerBase {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Server server;
-    private final String serverUrl;
+    private final String serverAddress;
 
-    public JettyWebhookBotContainer(String serverUrl, int port) {
-        this(serverUrl, new Server(port));
+    public JettyWebhookBotContainer(String hostname, int port) {
+        this("http://" + hostname + ":" + port, new Server(port));
     }
 
-    public JettyWebhookBotContainer(String serverUrl, Server server) {
+    public JettyWebhookBotContainer(String serverAddress, Server server) {
         this.server = server;
-        this.serverUrl = serverUrl;
+        this.serverAddress = serverAddress;
         this.server.setHandler(prepareHandler(server));
     }
 
     @Override
     public String getWebhookUrl(WebhookBot bot) {
-        return String.format("http://%s%s", serverUrl, bot.getKey());
+        return String.format("%s/%s", serverAddress, bot.getKey());
     }
 
     @Override
-    public void start() {
+    public void start() throws TamTamBotException {
         try {
             server.start();
         } catch (Exception e) {
-            LOG.error("Failed to start webhook server", e);
-            return;
+            throw new TamTamBotException("Failed to start webhook server", e);
         }
 
         super.start();

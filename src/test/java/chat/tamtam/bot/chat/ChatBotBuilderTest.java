@@ -4,6 +4,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
+import chat.tamtam.bot.Randoms;
+import chat.tamtam.bot.commands.Command;
+import chat.tamtam.bot.commands.CommandHandler;
+import chat.tamtam.bot.commands.CommandLine;
+import chat.tamtam.botapi.model.Message;
+
 import static chat.tamtam.bot.Mocks.message;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -19,6 +25,8 @@ public class ChatBotBuilderTest {
         AtomicBoolean help = new AtomicBoolean();
         AtomicBoolean unknown = new AtomicBoolean();
         AtomicBoolean byDefault = new AtomicBoolean();
+        AtomicBoolean handler = new AtomicBoolean();
+        String randomKey = Randoms.text();
         ChatBotBuilder builder = new ChatBotBuilder()
                 .on("start", (message, commandLine) -> {
                     if (!start.compareAndSet(false, true)) {
@@ -28,6 +36,19 @@ public class ChatBotBuilderTest {
                 .on("help", (message, commandLine) -> {
                     if (!help.compareAndSet(false, true)) {
                         fail();
+                    }
+                })
+                .add(new TestCommand() {
+                    @Override
+                    public String getKey() {
+                        return randomKey;
+                    }
+
+                    @Override
+                    public void execute(Message message, CommandLine commandLine) {
+                        if (!handler.compareAndSet(false, true)) {
+                            fail();
+                        }
                     }
                 })
                 .onUnknownCommand((message, commandLine) -> {
@@ -47,11 +68,13 @@ public class ChatBotBuilderTest {
         chatBot.replyOn(message("/help"));
         chatBot.replyOn(message("/unknown"));
         chatBot.replyOn(message("notcommand"));
+        chatBot.replyOn(message("/" + randomKey));
 
         assertThat(start.get(), is(true));
         assertThat(help.get(), is(true));
         assertThat(unknown.get(), is(true));
         assertThat(byDefault.get(), is(true));
+        assertThat(handler.get(), is(true));
     }
 
     @Test
@@ -70,5 +93,8 @@ public class ChatBotBuilderTest {
         chatBot.replyOn(message("/unknown"));
         chatBot.replyOn(message("notcommand"));
         assertThat(start.get(), is(true));
+    }
+
+    private abstract class TestCommand implements Command, CommandHandler {
     }
 }

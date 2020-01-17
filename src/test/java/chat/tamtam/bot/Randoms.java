@@ -1,5 +1,6 @@
 package chat.tamtam.bot;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,6 +33,14 @@ public class Randoms {
 
     public static double randomDouble() {
         return ThreadLocalRandom.current().nextDouble();
+    }
+
+    public static <T> T random(List<T> updates) {
+        return updates.get(randomInt(updates.size()));
+    }
+
+    public static int randomInt(int bound) {
+        return ThreadLocalRandom.current().nextInt(bound);
     }
 
     private static long nextId() {

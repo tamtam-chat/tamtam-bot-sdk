@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import org.jetbrains.annotations.Nullable;
 
+import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
 
 /**
@@ -34,7 +35,7 @@ public interface WebhookBotContainer {
     /**
      * Starts container (underlying server if it required, registered bots).
      */
-    void start();
+    void start() throws TamTamBotException;
 
     /**
      * Stops container (server, bots).

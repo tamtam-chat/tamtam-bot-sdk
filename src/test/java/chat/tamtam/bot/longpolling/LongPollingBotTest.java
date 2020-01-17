@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -17,8 +18,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import chat.tamtam.bot.Randoms;
 import chat.tamtam.botapi.client.TamTamClient;
-import chat.tamtam.botapi.client.TamTamSerializer;
-import chat.tamtam.botapi.client.TamTamTransportClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
 import chat.tamtam.botapi.model.GetSubscriptionsResult;
@@ -28,7 +27,7 @@ import chat.tamtam.botapi.queries.GetSubscriptionsQuery;
 import chat.tamtam.botapi.queries.GetUpdatesQuery;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
 
 /**
@@ -37,65 +36,38 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class LongPollingBotTest {
     @Mock
-    private TamTamTransportClient transportClient;
-    @Mock
-    private TamTamSerializer serializer;
-
     private TamTamClient client;
+    List<Update> allUpdates;
 
     @Before
-    public void setUp() {
-        client = new TamTamClient("token", transportClient, serializer);
+    public void setUp() throws Exception {
+        allUpdates = Stream.generate(Randoms::randomUpdate).limit(945).collect(Collectors.toList());
+        when(client.newCall(isA(GetUpdatesQuery.class))).thenAnswer(i -> {
+            GetUpdatesQuery query = i.getArgumentAt(0, GetUpdatesQuery.class);
+            long from = query.marker.getValue() == null ? 0 : query.marker.getValue();
+            if (from >= allUpdates.size()) {
+                return CompletableFuture.completedFuture(new UpdateList(Collections.emptyList(), null));
+            }
+
+            long limit = query.limit.getValue() == null ? 100 : query.limit.getValue();
+            int to = (int) Math.min(allUpdates.size(), from + limit);
+            List<Update> sublist = allUpdates.subList(Math.toIntExact(from), to);
+            return CompletableFuture.completedFuture(new UpdateList(sublist, from + sublist.size()));
+        });
     }
 
     @Test
     public void shouldHandleUpdates() throws Exception {
-//        List<Update> updates = Stream.generate(Randoms::randomUpdate).limit(945).collect(Collectors.toList());
-//        when(transportClient..g).thenAnswer(i -> new MockGetUpdatesQuery(updates));
-//
-//        GetSubscriptionsQuery getSubsQuery = mock(GetSubscriptionsQuery.class);
-//        when(getSubsQuery.execute()).thenReturn(new GetSubscriptionsResult(Collections.emptyList()));
-//        when(client.getSubscriptions()).thenReturn(getSubsQuery);
-//
-//        TestBot bot = new TestBot(client, new HashSet<>(updates));
-//        bot.start();
-//        bot.await();
-//        bot.stop();
+        GetSubscriptionsResult subscriptionsResult = new GetSubscriptionsResult(Collections.emptyList());
+        when(client.newCall(isA(GetSubscriptionsQuery.class)))
+                .thenReturn(CompletableFuture.completedFuture(subscriptionsResult));
+
+        TestBot bot = new TestBot(client, new HashSet<>(allUpdates));
+        bot.start();
+        bot.await();
+        bot.stop();
     }
 
-    private class MockGetUpdatesQuery extends GetUpdatesQuery {
-        private final List<Update> allUpdates;
-        private Long from;
-        private Integer limit;
-
-        MockGetUpdatesQuery(List<Update> allUpdates) {
-            super(mock(TamTamClient.class));
-            this.allUpdates = allUpdates;
-        }
-
-        @Override
-        public GetUpdatesQuery marker(Long value) {
-            this.from = value == null ? 0 : value;
-            return super.marker(value);
-        }
-
-        @Override
-        public GetUpdatesQuery limit(Integer value) {
-            this.limit = value == null ? 100 : value;
-            return super.limit(value);
-        }
-
-        @Override
-        public UpdateList execute() {
-            if (from >= allUpdates.size()) {
-                return new UpdateList(Collections.emptyList(), null);
-            }
-
-            int to = (int) Math.min(allUpdates.size(), from + limit);
-            List<Update> sublist = allUpdates.subList(Math.toIntExact(from), to);
-            return new UpdateList(sublist, from + sublist.size());
-        }
-    }
 
     private class TestBot extends LongPollingBot {
         final Set<Update> expectedUpdates;
