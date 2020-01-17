@@ -19,10 +19,10 @@ These methods should have only one parameter of type `Update`. Every method will
 
 For example, simple bot that just does print incoming message to system console:
 
-```
+```java
 public class LoggingBot extends LongPollingBot {
-    public LoggingBot(TamTamBotAPI api) {
-        super(api, LongPollingBotOptions.DEFAULT);
+    public LoggingBot(String accessToken) {
+        super(accessToken);
     }
 
     @UpdateHandler
@@ -34,6 +34,11 @@ public class LoggingBot extends LongPollingBot {
 ```
 
 All other updates will be ignored. If you want to handle all update types just override `onUpdate` method of `LongPollingBot`.
+
+Alternatively, you can directly create instance of LongPollingBot and pass handlers in constructor:
+```java
+LongPollingBot bot = new LongPollingBot("%ACCESS_TOKEN%", handler1, handler2); // handler can be any object that has methods annotated with `@UpdateHandler`
+```
 
 As soon as you created instance of this class you should `start` it:
 
@@ -48,7 +53,7 @@ Call `stop` as soon as you ready to shutdown it:
 bot.stop();
 ```
 
-Check out [EchoBot](examples/longpolling-echobot/README.md) for more complete example.
+Check out [EchoBot](examples/longpolling-echobot/src/main/java/chat/tamtam/echobot/Main.java) for more complete example.
 
 ## Webhooks
 
