@@ -13,9 +13,11 @@ Minimum required version of Java is 8.
 
 Long-polling is the easiest way to receive updates for your bot because it does not require running web server.
 
-To start your bot just extends `LongPollingBot` class and implement `onUpdate` method.
+To start your bot just extends `LongPollingBot` class and add methods annotated by `@UpdateHandler` annotation.
 
-For example, simple bot that just does print incoming *update* to system console:
+These methods should have only one parameter of type `Update`. Every method will handle update of such type.
+
+For example, simple bot that just does print incoming message to system console:
 
 ```
 public class LoggingBot extends LongPollingBot {
@@ -23,18 +25,20 @@ public class LoggingBot extends LongPollingBot {
         super(api, LongPollingBotOptions.DEFAULT);
     }
 
-    @Override
-    public void onUpdate(Update update) {
-        System.out.println(update);
+    @UpdateHandler
+    public Object onMessageCreated(MessageCreatedUpdate update) {
+        System.out.println(update.getMessage());
+        return null; // return null if we do not want to reply
     }
 }
 ```
 
+All other updates will be ignored. If you want to handle all update types just override `onUpdate` method of `LongPollingBot`.
+
 As soon as you created instance of this class you should `start` it:
 
 ```java
-TamTamBotAPI api = TamTamBotAPI.create("%ACCESS_TOKEN%");
-LoggingBot bot = new LoggingBot(api);
+LoggingBot bot = new LoggingBot("%ACCESS_TOKEN%");
 bot.start();
 ```
 This method starts separated *non-daemon* thread that polls Bot API in cycle.
@@ -44,7 +48,7 @@ Call `stop` as soon as you ready to shutdown it:
 bot.stop();
 ```
 
-Check out [EchoBot]() for more complete example.
+Check out [EchoBot](examples/longpolling-echobot/README.md) for more complete example.
 
 ## Webhooks
 
