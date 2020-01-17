@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>chat.tamtam</groupId>
-    <artifactId>tamtam-logbot</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>longpolling-echobot</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
-    <name>tamtam-logbot</name>
+    <name>TamTam Long Polling Echo Bot</name>
     <inceptionYear>2019</inceptionYear>
     <organization>
         <name>Mail.Ru Group</name>
@@ -42,13 +42,8 @@
     <dependencies>
         <dependency>
             <groupId>chat.tamtam</groupId>
-            <artifactId>tamtam-bot-api</artifactId>
-            <version>0.1.9</version>
-        </dependency>
-        <dependency>
-            <groupId>chat.tamtam</groupId>
             <artifactId>tamtam-bot-sdk</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

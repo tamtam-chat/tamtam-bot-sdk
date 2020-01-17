@@ -2,7 +2,7 @@
 
 This is a simple **long-polling** bot that sends back JSON it received.
 
-## Running
+## Run
 
 To run example type in terminal:
 

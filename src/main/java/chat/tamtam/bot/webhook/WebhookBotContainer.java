@@ -1,5 +1,6 @@
 package chat.tamtam.bot.webhook;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.jetbrains.annotations.Nullable;
@@ -49,5 +50,5 @@ public interface WebhookBotContainer {
      * @return response. Can be `null` if bot doesn't send any response to Bot API.
      */
     @Nullable
-    String handleRequest(String path, String method, InputStream body) throws WebhookException;
+    String handleRequest(String path, String method, InputStream body) throws WebhookException, IOException;
 }

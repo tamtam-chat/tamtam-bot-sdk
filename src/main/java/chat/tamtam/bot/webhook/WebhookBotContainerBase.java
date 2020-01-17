@@ -1,5 +1,6 @@
 package chat.tamtam.bot.webhook;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -92,8 +93,8 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
         Update update;
         try {
             update = serializer.deserialize(body, Update.class);
-        } catch (SerializationException e1) {
-            throw WebhookException.internalServerError("Failed to parse update: " + body, e1);
+        } catch (SerializationException e) {
+            throw WebhookException.internalServerError("Failed to parse update", e);
         }
 
         Object response = bot.onUpdate(update);

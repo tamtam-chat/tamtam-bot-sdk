@@ -1,4 +1,4 @@
-package chat.tamtam;
+package chat.tamtam.echobot;
 
 import java.lang.invoke.MethodHandles;
 import java.net.URISyntaxException;
@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import chat.tamtam.bot.webhook.WebhookBot;
 import chat.tamtam.bot.webhook.WebhookBotOptions;
-import chat.tamtam.botapi.TamTamBotAPI;
 import chat.tamtam.botapi.model.Update;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -27,11 +26,11 @@ public class WebhookEchoBot extends WebhookBot {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private static final Options OPTIONS = new Options();
 
-    private final WebhookEchoBotUpdateHandler handler;
+    private final EchoHandler handler;
 
-    private WebhookEchoBot(TamTamBotAPI api) {
-        super(api, WebhookBotOptions.DEFAULT, "/echo");
-        this.handler = new WebhookEchoBotUpdateHandler(api);
+    private WebhookEchoBot(String accessToken) {
+        super(accessToken, WebhookBotOptions.DEFAULT);
+        this.handler = new EchoHandler(getClient());
     }
 
     public static void main(String[] args) throws Exception {
@@ -45,8 +44,7 @@ public class WebhookEchoBot extends WebhookBot {
         }
 
         String accessToken = OPTIONS.accessToken.value(optionSet);
-        TamTamBotAPI api = TamTamBotAPI.create(accessToken);
-        WebhookEchoBot bot = new WebhookEchoBot(api);
+        WebhookEchoBot bot = new WebhookEchoBot(accessToken);
 
         int port = OPTIONS.port.value(optionSet);
         Tomcat tomcat = new Tomcat();
@@ -57,6 +55,10 @@ public class WebhookEchoBot extends WebhookBot {
 
 
         String serverUrl = OPTIONS.host.value(optionSet);
+        if (OPTIONS.port.value(optionSet) != null) {
+            serverUrl += ":" + OPTIONS.port.value(optionSet);
+        }
+
         ServletWebhookBotContainer botContainer = new ServletWebhookBotContainer(serverUrl);
         botContainer.register(bot);
 
@@ -71,9 +73,10 @@ public class WebhookEchoBot extends WebhookBot {
     }
 
     @Override
-    public void onUpdate(Update update) {
+    public Object onUpdate(Update update) {
         LOG.info("Handling update: {}", update);
         update.visit(handler);
+        return null;
     }
 
     private static Connector getSslConnector(int port) throws URISyntaxException {
@@ -116,12 +119,11 @@ public class WebhookEchoBot extends WebhookBot {
 
         OptionSpec<String> host = accepts("host")
                 .withRequiredArg()
-                .required()
+                .defaultsTo("0.0.0.0")
                 .ofType(String.class);
 
         OptionSpec<Integer> port = accepts("port")
                 .withRequiredArg()
-                .ofType(Integer.class)
-                .defaultsTo(20997);
+                .ofType(Integer.class);
     }
 }

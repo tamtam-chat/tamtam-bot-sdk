@@ -1,4 +1,4 @@
-package chat.tamtam;
+package chat.tamtam.echobot;
 
 import java.io.IOException;
 
@@ -55,19 +55,26 @@ public class ServletWebhookBotContainer extends WebhookBotContainerBase implemen
 
     @Override
     public String getWebhookUrl(WebhookBot bot) {
-        return String.format("https://%s%s%s", serverUrl, "/bots", bot.getPath());
+        return String.format("https://%s/%s/%s", serverUrl, "bots", bot.getKey());
     }
 
     private class DelegatingBotServlet extends HttpServlet {
         @Override
         protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+            String webhookResponse;
             try {
-                String webhookResponse = handleRequest(req.getPathInfo(), req.getMethod(), req.getInputStream());
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.getWriter().println(webhookResponse);
+                webhookResponse = handleRequest(req.getPathInfo(), req.getMethod(), req.getInputStream());
             } catch (WebhookException e) {
                 resp.sendError(e.getErrorCode(), e.getMessage());
+                return;
             }
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+            if (webhookResponse == null) {
+                return;
+            }
+
+            resp.getWriter().println(webhookResponse);
         }
     }
 }
