@@ -3,47 +3,62 @@
 TamTam Bot SDK is a simple library built on top of [tamtam-bot-api](https://github.com/tamtam-chat/tamtam-bot-api) that
 helps you to develop bots for [TamTam](https://tamtam.chat) quickly.
 
-Both long-polling and webhook are supported.
+## Usage
 
-## Requirements
+Add the following dependency to your project:
 
-Minimum required version of Java is 8.
+Maven:
+```xml
+<dependency>
+    <groupId>chat.tamtam</groupId>
+    <artifactId>tamtam-bot-sdk</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
 
-## Long-polling
+Gradle:
+```
+implementation group: 'chat.tamtam', name: 'tamtam-bot-sdk', version: '0.0.1'
+```
+
+Then you should choose the way how your bot will receive notifications: long-polling or webhook.
+
+### Long-polling
 
 Long-polling is the easiest way to receive updates for your bot because it does not require running web server.
 
-To start your bot just extends `LongPollingBot` class and add methods annotated by `@UpdateHandler` annotation.
+To start your bot just extend [`LongPollingBot`](src/main/java/chat/tamtam/bot/longpolling/LongPollingBot.java) class and add methods annotated by [`@UpdateHandler`](src/main/java/chat/tamtam/bot/annotations/UpdateHandler.java) annotation.
 
-These methods should have only one parameter of type `Update`. Every method will handle update of such type.
+These methods should have **only** one parameter of type [`Update`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Update.java). Every method will handle update of such type.
 
-For example, simple bot that just does print incoming message to system console:
+For example, simple bot that just replies on incoming message:
 
 ```java
-public class LoggingBot extends LongPollingBot {
+public class ReplyBot extends LongPollingBot {
     public LoggingBot(String accessToken) {
         super(accessToken);
     }
 
     @UpdateHandler
     public Object onMessageCreated(MessageCreatedUpdate update) {
-        System.out.println(update.getMessage());
-        return null; // return null if we do not want to reply
+        Message message = update.getMessage();
+        return NewMessageBodyBuilder.ofText("Reply on: " + message.getBody()).build(); // return null if you do not want to reply synchronously
     }
 }
 ```
 
-All other updates will be ignored. If you want to handle all update types just override `onUpdate` method of `LongPollingBot`.
+All other updates will be ignored. If you want to handle any update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
 
-Alternatively, you can directly create instance of LongPollingBot and pass handlers in constructor:
+Alternatively, you can directly create instance of `LongPollingBot` and pass handlers to constructor:
 ```java
-LongPollingBot bot = new LongPollingBot("%ACCESS_TOKEN%", handler1, handler2); // handler can be any object that has methods annotated with `@UpdateHandler`
+// handler can be any object that has methods annotated with `@UpdateHandler`
+LongPollingBot bot = new LongPollingBot("%ACCESS_TOKEN%", handler1, handler2);
 ```
 
-As soon as you created instance of this class you should `start` it:
+As soon as you created instance of bot you must `start` it:
 
 ```java
-LoggingBot bot = new LoggingBot("%ACCESS_TOKEN%");
+ReplyBot bot = new ReplyBot("%ACCESS_TOKEN%");
 bot.start();
 ```
 This method starts separated *non-daemon* thread that polls Bot API in cycle.
@@ -55,9 +70,18 @@ bot.stop();
 
 Check out [EchoBot](examples/longpolling-echobot/src/main/java/chat/tamtam/echobot/Main.java) for more complete example.
 
-## Webhooks
+### Webhooks
 
-TamTamIntegrationTest.setUp
+Webhook subscribed bot requires running HTTP server. By default we use [Jetty](https://www.eclipse.org/jetty/)
+but you can use any server you want.
+
+All webhook bots should be put
+
+## Builders
+
+## Requirements
+
+Minimum required version of Java is 8.
 
 ## Contributing
 
