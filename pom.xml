@@ -33,9 +33,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/tamtam-chat/tamtam-bot-api</url>
-        <connection>scm:git:https://github.com/tamtam-chat/tamtam-bot-api.git</connection>
-        <developerConnection>scm:git:https://github.com/tamtam-chat/tamtam-bot-api.git</developerConnection>
+        <url>https://github.com/tamtam-chat/tamtam-bot-sdk</url>
+        <connection>scm:git:https://github.com/tamtam-chat/tamtam-bot-sdk.git</connection>
+        <developerConnection>scm:git:https://github.com/tamtam-chat/tamtam-bot-sdk.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -62,6 +62,16 @@
             <artifactId>jetty-server</artifactId>
             <version>9.4.20.v20190813</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
 
         <!-- For tests -->
         <dependency>
@@ -87,16 +97,6 @@
             <artifactId>hamcrest-all</artifactId>
             <version>1.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
         </dependency>
     </dependencies>
 
