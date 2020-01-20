@@ -94,7 +94,7 @@ botContainer.start();
 
 Check out [jetty-webhook-echobot](examples/jetty-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
 for more complete example or [tomcat-webhook-echobot](examples/tomcat-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
-as an alternative example of container implementation.
+as an example of alternative container implementation.
 
 ## Builders
 
