@@ -98,8 +98,6 @@ Check out [jetty-webhook-echobot](examples/jetty-webhook-echobot/src/main/java/c
 for more complete example or [tomcat-webhook-echobot](examples/tomcat-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
 as an example of alternative container implementation.
 
-## Builders
-
 ## Requirements
 
 Minimum required version of Java is 8.
