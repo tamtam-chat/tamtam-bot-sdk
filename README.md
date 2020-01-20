@@ -1,6 +1,6 @@
 # TamTam Bot SDK
 
-![](https://github.com/tamtam-chat/tamtam-bot-sdk/workflows/Java%20CI/badge.svg?branch=master)
+[![build status](https://github.com/tamtam-chat/tamtam-bot-sdk/workflows/Build/badge.svg?branch=master)](https://github.com/tamtam-chat/tamtam-bot-sdk/actions?query=workflow%3A%22Build%22)
 
 TamTam Bot SDK is a simple library built on top of [tamtam-bot-api](https://github.com/tamtam-chat/tamtam-bot-api) that
 helps you to develop bots for [TamTam](https://tamtam.chat) quickly.
