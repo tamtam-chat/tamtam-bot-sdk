@@ -1,4 +1,4 @@
-# TamTam Bot SDK
+# TamTam Bot SDK <sup>𝛂</sup>
 
 [![build status](https://github.com/tamtam-chat/tamtam-bot-sdk/workflows/Build/badge.svg?branch=master)](https://github.com/tamtam-chat/tamtam-bot-sdk/actions?query=workflow%3A%22Build%22)
 
