@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import chat.tamtam.bot.TamTamBot;
 import chat.tamtam.bot.exceptions.BotNotFoundException;
 import chat.tamtam.bot.exceptions.TamTamBotException;
 import chat.tamtam.bot.exceptions.WebhookException;
@@ -25,7 +26,7 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Map<String, WebhookBot> bots = new ConcurrentHashMap<>();
-    private final Map<WebhookBot, String> reverseLookup = new ConcurrentHashMap<>();
+    private final Map<TamTamBot, String> reverseLookup = new ConcurrentHashMap<>();
 
     @Override
     public void register(WebhookBot bot) {
@@ -57,8 +58,12 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     public void start() throws TamTamBotException {
         for (WebhookBot bot : bots.values()) {
             try {
-                String url = bot.start(this);
-                LOG.info("Bot {} registered webhook URL: {}", bot, url);
+                boolean isStarted = bot.start(this);
+                if (!isStarted) {
+                    continue;
+                }
+
+                LOG.info("Bot {} registered webhook URL: {}", bot, getWebhookUrl(bot));
             } catch (Exception e) {
                 LOG.error("Failed to start bot {}", bot, e);
             }

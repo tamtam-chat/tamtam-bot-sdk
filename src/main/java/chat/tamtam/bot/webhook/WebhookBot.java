@@ -43,11 +43,11 @@ public class WebhookBot extends TamTamBotBase implements TamTamBot {
     }
 
     /**
-     * @return registered webhook URL
+     * @return true if bot started successfully
      */
-    public String start(WebhookBotContainer container) throws TamTamBotException {
+    public boolean start(WebhookBotContainer container) throws TamTamBotException {
         if (!running.compareAndSet(false, true)) {
-            return container.getWebhookUrl(this);
+            return false;
         }
 
         if (options.shouldRemoveOldSubscriptions()) {
@@ -68,7 +68,7 @@ public class WebhookBot extends TamTamBotBase implements TamTamBot {
             throw new TamTamBotException("Failed to start webhook bot", e);
         }
 
-        return webhookUrl;
+        return true;
     }
 
     /**

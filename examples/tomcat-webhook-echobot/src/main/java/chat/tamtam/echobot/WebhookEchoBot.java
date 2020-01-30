@@ -64,7 +64,7 @@ public class WebhookEchoBot extends WebhookBot {
 
         String servletName = "Bots";
         Tomcat.addServlet(rootCtx, servletName, botContainer);
-        rootCtx.addServletMapping("/bots/*", servletName);
+        rootCtx.addServletMappingDecoded("/bots/*", servletName);
 
         tomcat.start();
         botContainer.start();
