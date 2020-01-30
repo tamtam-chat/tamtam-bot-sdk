@@ -14,7 +14,7 @@ jobs:
         with:
           java-version: 1.8
       - name: Build project
-        run: mvn -B deploy --file pom.xml
+        run: mvn -B install --file pom.xml
       - name: Build example 1
         run: mvn -B package --file examples/jetty-webhook-echobot/pom.xml
       - name: Build example 2
