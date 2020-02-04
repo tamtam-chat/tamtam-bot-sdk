@@ -1,6 +1,9 @@
 package chat.tamtam.bot.builders;
 
 import chat.tamtam.bot.builders.attachments.AttachmentsBuilder;
+import chat.tamtam.botapi.model.LinkedMessage;
+import chat.tamtam.botapi.model.Message;
+import chat.tamtam.botapi.model.MessageBody;
 import chat.tamtam.botapi.model.MessageLinkType;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;
@@ -19,6 +22,13 @@ public class NewMessageBodyBuilder {
         this.text = text;
         this.attachments = attachments;
         this.link = link;
+    }
+
+    public static NewMessageBodyBuilder copyOf(Message message) {
+        MessageBody messageBody = message.getBody();
+        return ofText(messageBody.getText())
+                .withAttachments(AttachmentsBuilder.copyOf(messageBody.getAttachments()))
+                .withLink(message.getLink());
     }
 
     public static NewMessageBodyBuilder ofText(String text) {
@@ -54,6 +64,21 @@ public class NewMessageBodyBuilder {
 
     public NewMessageBodyBuilder withForward(String messageId) {
         this.link = new NewMessageLink(MessageLinkType.FORWARD, messageId);
+        return this;
+    }
+
+    public NewMessageBodyBuilder withLink(LinkedMessage linkedMessage) {
+        if (linkedMessage == null) {
+            return this;
+        }
+
+        switch (linkedMessage.getType()) {
+            case FORWARD:
+                return withForward(linkedMessage.getMessage().getMid());
+            case REPLY:
+                return withReply(linkedMessage.getMessage().getMid());
+        }
+
         return this;
     }
 

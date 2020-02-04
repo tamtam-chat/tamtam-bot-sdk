@@ -8,8 +8,6 @@ import java.util.List;
 import org.junit.Test;
 
 import chat.tamtam.bot.Randoms;
-import chat.tamtam.bot.builders.attachments.AttachmentsBuilder;
-import chat.tamtam.bot.builders.attachments.PhotosBuilder;
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.AudioAttachmentRequest;
@@ -93,7 +91,7 @@ public class AttachmentsBuilderTest {
         Attachment attach1 = new PhotoAttachment(new PhotoAttachmentPayload(1L, "1", "1"));
         Attachment attach2 = new PhotoAttachment(new PhotoAttachmentPayload(2L, "2", "2"));
         Button button = new CallbackButton("1", "1");
-        List<AttachmentRequest> result = AttachmentsBuilder.ofAttachments(Arrays.asList(attach1, attach2))
+        List<AttachmentRequest> result = AttachmentsBuilder.copyOf(Arrays.asList(attach1, attach2))
                 .with(inlineKeyboard(single(button)))
                 .build();
 

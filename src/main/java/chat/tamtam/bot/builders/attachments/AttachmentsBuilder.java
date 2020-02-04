@@ -19,14 +19,14 @@ public interface AttachmentsBuilder {
 
     List<AttachmentRequest> build();
 
-    static AttachmentsBuilder ofAttachments(List<Attachment> attachments) {
+    static AttachmentsBuilder copyOf(List<Attachment> attachments) {
         return requireNonNull(attachments, "attachments").stream()
-                .map(AttachmentsBuilder::ofAttachment)
+                .map(AttachmentsBuilder::copyOf)
                 .reduce(Concat::new)
                 .orElse(EMPTY);
     }
 
-    static AttachmentsBuilder ofAttachment(Attachment attachment) {
+    static AttachmentsBuilder copyOf(Attachment attachment) {
         return new CopyBuilder(requireNonNull(attachment, "attachment"));
     }
 

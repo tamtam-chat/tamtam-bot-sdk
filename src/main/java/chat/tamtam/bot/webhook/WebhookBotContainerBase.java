@@ -74,7 +74,11 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
     public void stop() {
         for (WebhookBot bot : bots.values()) {
             try {
-                bot.stop(this);
+                boolean isStopped = bot.stop(this);
+                if (!isStopped) {
+                    continue;
+                }
+
                 LOG.info("Bot {} stopped", bot);
             } catch (Exception e) {
                 LOG.error("Failed to stop bot {}", bot, e);
