@@ -1,13 +1,13 @@
 package chat.tamtam.bot.builders.attachments;
 
+import chat.tamtam.botapi.model.Attachment;
+import chat.tamtam.botapi.model.AttachmentRequest;
+import chat.tamtam.botapi.model.UploadedInfo;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import chat.tamtam.botapi.model.Attachment;
-import chat.tamtam.botapi.model.AttachmentRequest;
-import chat.tamtam.botapi.model.UploadedInfo;
 
 import static java.util.Objects.requireNonNull;
 
@@ -16,10 +16,14 @@ import static java.util.Objects.requireNonNull;
  */
 public interface AttachmentsBuilder {
     AttachmentsBuilder EMPTY = Collections::emptyList;
+    AttachmentsBuilder NULL = () -> null;
 
     List<AttachmentRequest> build();
 
     static AttachmentsBuilder copyOf(List<Attachment> attachments) {
+        if (attachments == null) {
+            return NULL;
+        }
         return requireNonNull(attachments, "attachments").stream()
                 .map(AttachmentsBuilder::copyOf)
                 .reduce(Concat::new)
