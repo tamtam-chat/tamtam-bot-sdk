@@ -34,6 +34,14 @@ public interface AttachmentsBuilder {
         return new CopyBuilder(requireNonNull(attachment, "attachment"));
     }
 
+    static AttachmentsBuilder wrap(List<AttachmentRequest> requests) {
+        return () -> requests;
+    }
+
+    static AttachmentsBuilder wrap(AttachmentRequest request) {
+        return () -> Collections.singletonList(request);
+    }
+
     static AttachmentsBuilder photos(String... tokens) {
         return PhotosBuilder.byTokens(tokens);
     }
