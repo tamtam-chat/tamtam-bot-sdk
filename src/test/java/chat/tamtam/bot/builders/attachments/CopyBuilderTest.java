@@ -2,6 +2,7 @@ package chat.tamtam.bot.builders.attachments;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -52,7 +53,7 @@ public class CopyBuilderTest {
     @Test
     public void test0() {
         // unknown attachment
-        List<AttachmentRequest> result = new CopyBuilder(new Attachment()).build();
+        List<AttachmentRequest> result = new CopyBuilder(new Attachment()).getList();
         assertThat(result, is(Collections.emptyList()));
     }
 
@@ -60,7 +61,7 @@ public class CopyBuilderTest {
     public void test1() {
         String token = Randoms.text();
         List<AttachmentRequest> result = new CopyBuilder(
-                new PhotoAttachment(new PhotoAttachmentPayload(123L, token, "url"))).build();
+                new PhotoAttachment(new PhotoAttachmentPayload(123L, token, "url"))).getList();
 
         assertThat(result, is(Collections.singletonList(
                 new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().token(token)))));
@@ -70,7 +71,7 @@ public class CopyBuilderTest {
     public void test2() {
         String token = Randoms.text();
         List<AttachmentRequest> result = new CopyBuilder(
-                new VideoAttachment(new MediaAttachmentPayload(token, "url"))).build();
+                new VideoAttachment(new MediaAttachmentPayload(token, "url"))).build().collect(Collectors.toList());;
 
         assertThat(result, is(Collections.singletonList(
                 new VideoAttachmentRequest(new UploadedInfo().token(token)))));
@@ -80,7 +81,7 @@ public class CopyBuilderTest {
     public void test3() {
         String token = Randoms.text();
         List<AttachmentRequest> result = new CopyBuilder(
-                new AudioAttachment(new MediaAttachmentPayload(token, "url"))).build();
+                new AudioAttachment(new MediaAttachmentPayload(token, "url"))).build().collect(Collectors.toList());;
 
         assertThat(result, is(Collections.singletonList(
                 new AudioAttachmentRequest(new UploadedInfo().token(token)))));
@@ -90,7 +91,7 @@ public class CopyBuilderTest {
     public void test4() {
         String token = Randoms.text();
         List<AttachmentRequest> result = new CopyBuilder(
-                new FileAttachment(new FileAttachmentPayload(token, "url"), "filename", 1L)).build();
+                new FileAttachment(new FileAttachmentPayload(token, "url"), "filename", 1L)).getList();
 
         assertThat(result, is(Collections.singletonList(
                 new FileAttachmentRequest(new UploadedInfo().token(token)))));
@@ -100,7 +101,7 @@ public class CopyBuilderTest {
     public void test5() {
         String code = Randoms.text();
         List<AttachmentRequest> result = new CopyBuilder(
-                new StickerAttachment(new StickerAttachmentPayload(code, "url"), 1, 2)).build();
+                new StickerAttachment(new StickerAttachmentPayload(code, "url"), 1, 2)).getList();
 
         assertThat(result, is(Collections.singletonList(
                 new StickerAttachmentRequest(new StickerAttachmentRequestPayload(code)))));
@@ -110,7 +111,7 @@ public class CopyBuilderTest {
     public void test6() {
         User user = Randoms.randomUser();
         List<AttachmentRequest> result = new CopyBuilder(
-                new ContactAttachment(new ContactAttachmentPayload().tamInfo(user))).build();
+                new ContactAttachment(new ContactAttachmentPayload().tamInfo(user))).getList();
 
         assertThat(result, is(Collections.singletonList(
                 new ContactAttachmentRequest(
@@ -123,7 +124,7 @@ public class CopyBuilderTest {
                 Collections.singletonList(new LinkButton(Randoms.text(), Randoms.text())));
 
         Keyboard keyboard = new Keyboard(buttons);
-        List<AttachmentRequest> result = new CopyBuilder(new InlineKeyboardAttachment(keyboard)).build();
+        List<AttachmentRequest> result = new CopyBuilder(new InlineKeyboardAttachment(keyboard)).getList();
 
         assertThat(result, is(Collections.singletonList(
                 new InlineKeyboardAttachmentRequest(new InlineKeyboardAttachmentRequestPayload(buttons)))));
@@ -134,7 +135,7 @@ public class CopyBuilderTest {
         String url = Randoms.text();
         String token = Randoms.text();
         ShareAttachmentPayload payload = new ShareAttachmentPayload().url(url).token(token);
-        List<AttachmentRequest> result = new CopyBuilder(new ShareAttachment(payload)).build();
+        List<AttachmentRequest> result = new CopyBuilder(new ShareAttachment(payload)).getList();
         assertThat(result, is(Collections.singletonList(new ShareAttachmentRequest(payload))));
     }
 
@@ -142,7 +143,7 @@ public class CopyBuilderTest {
     public void test9() {
         double latitude = Randoms.randomDouble();
         double longitude = Randoms.randomDouble();
-        List<AttachmentRequest> result = new CopyBuilder(new LocationAttachment(latitude, longitude)).build();
+        List<AttachmentRequest> result = new CopyBuilder(new LocationAttachment(latitude, longitude)).getList();
         assertThat(result, is(Collections.singletonList(new LocationAttachmentRequest(latitude, longitude))));
     }
 }

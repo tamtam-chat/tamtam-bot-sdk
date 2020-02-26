@@ -57,7 +57,7 @@ public class AttachmentsBuilderTest {
                 .with(files(token3, token4))
                 .with(files(new UploadedInfo().token(token3), new UploadedInfo().token(token4)))
                 .with(inlineKeyboard(single(button).addRow(button2, button3)))
-                .build();
+                .getList();
 
         List<AttachmentRequest> expected = new ArrayList<>();
         expected.add(new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().token("123")));
@@ -93,7 +93,7 @@ public class AttachmentsBuilderTest {
         Button button = new CallbackButton("1", "1");
         List<AttachmentRequest> result = AttachmentsBuilder.copyOf(Arrays.asList(attach1, attach2))
                 .with(inlineKeyboard(single(button)))
-                .build();
+                .getList();
 
         List<AttachmentRequest> expected = new ArrayList<>();
         expected.add(new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().token("1")));

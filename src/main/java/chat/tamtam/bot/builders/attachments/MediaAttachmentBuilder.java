@@ -1,9 +1,8 @@
 package chat.tamtam.bot.builders.attachments;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.UploadedInfo;
@@ -27,9 +26,7 @@ public abstract class MediaAttachmentBuilder implements AttachmentsBuilder {
     protected abstract AttachmentRequest toAttachRequest(UploadedInfo uploadedInfo);
 
     @Override
-    public List<AttachmentRequest> build() {
-        return Arrays.stream(uploadedInfos)
-                .map(this::toAttachRequest)
-                .collect(Collectors.toList());
+    public Stream<AttachmentRequest> build() {
+        return Arrays.stream(uploadedInfos).map(this::toAttachRequest);
     }
 }

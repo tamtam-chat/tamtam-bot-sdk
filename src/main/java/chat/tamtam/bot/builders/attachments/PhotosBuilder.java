@@ -13,13 +13,11 @@ import chat.tamtam.botapi.model.PhotoAttachmentRequestPayload;
 public class PhotosBuilder {
     public static AttachmentsBuilder byTokens(String... tokens) {
         return () -> Arrays.stream(Objects.requireNonNull(tokens, "tokens"))
-                .map(token -> new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().token(token)))
-                .collect(Collectors.toList());
+                .map(token -> new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().token(token)));
     }
 
     public static AttachmentsBuilder byUrls(String... urls) {
         return () -> Arrays.stream(urls)
-                .map(url -> new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().url(url)))
-                .collect(Collectors.toList());
+                .map(url -> new PhotoAttachmentRequest(new PhotoAttachmentRequestPayload().url(url)));
     }
 }

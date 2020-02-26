@@ -1,13 +1,13 @@
 package chat.tamtam.bot.builders.attachments;
 
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.UploadedInfo;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
@@ -15,10 +15,10 @@ import static java.util.Objects.requireNonNull;
  * @author alexandrchuprin
  */
 public interface AttachmentsBuilder {
-    AttachmentsBuilder EMPTY = Collections::emptyList;
+    AttachmentsBuilder EMPTY = Stream::empty;
     AttachmentsBuilder NULL = () -> null;
 
-    List<AttachmentRequest> build();
+    Stream<AttachmentRequest> build();
 
     static AttachmentsBuilder copyOf(List<Attachment> attachments) {
         if (attachments == null) {
@@ -35,11 +35,11 @@ public interface AttachmentsBuilder {
     }
 
     static AttachmentsBuilder wrap(List<AttachmentRequest> requests) {
-        return () -> requests;
+        return requests::stream;
     }
 
     static AttachmentsBuilder wrap(AttachmentRequest request) {
-        return () -> Collections.singletonList(request);
+        return () -> Stream.of(request);
     }
 
     static AttachmentsBuilder photos(String... tokens) {
@@ -71,11 +71,19 @@ public interface AttachmentsBuilder {
     }
 
     static AttachmentsBuilder inlineKeyboard(InlineKeyboardBuilder keyboardBuilder) {
-        return () -> Collections.singletonList(requireNonNull(keyboardBuilder, "keyboardBuilder").build());
+        return () -> Stream.of(requireNonNull(keyboardBuilder, "keyboardBuilder").build());
+    }
+
+    default List<AttachmentRequest> getList() {
+        return build().collect(Collectors.toList());
     }
 
     default AttachmentsBuilder with(AttachmentsBuilder anotherBuilder) {
         return new Concat(this, requireNonNull(anotherBuilder, "anotherBuilder"));
+    }
+
+    default AttachmentsBuilder filtering(Predicate<? super AttachmentRequest> filter) {
+        return new Filter(this, filter);
     }
 
     class Concat implements AttachmentsBuilder {
@@ -88,8 +96,23 @@ public interface AttachmentsBuilder {
         }
 
         @Override
-        public List<AttachmentRequest> build() {
-            return Stream.concat(left.build().stream(), right.build().stream()).collect(Collectors.toList());
+        public Stream<AttachmentRequest> build() {
+            return Stream.concat(left.build(), right.build());
+        }
+    }
+
+    class Filter implements AttachmentsBuilder {
+        private final AttachmentsBuilder target;
+        private final Predicate<? super AttachmentRequest> filter;
+
+        public Filter(AttachmentsBuilder target, Predicate<? super AttachmentRequest> filter) {
+            this.target = target;
+            this.filter = filter;
+        }
+
+        @Override
+        public Stream<AttachmentRequest> build() {
+            return target.build().filter(filter);
         }
     }
 }

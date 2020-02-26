@@ -1,8 +1,7 @@
 package chat.tamtam.bot.builders.attachments;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
@@ -98,8 +97,8 @@ public class CopyBuilder implements AttachmentsBuilder, Attachment.Mapper<Attach
     }
 
     @Override
-    public List<AttachmentRequest> build() {
+    public Stream<AttachmentRequest> build() {
         AttachmentRequest request = attachment.map(this);
-        return request == null ? Collections.emptyList() : Collections.singletonList(request);
+        return request == null ? Stream.empty() : Stream.of(request);
     }
 }

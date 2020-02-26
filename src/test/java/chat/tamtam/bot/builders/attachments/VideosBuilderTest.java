@@ -22,13 +22,13 @@ public class VideosBuilderTest {
     public void shouldBuildfromUploadedInfo() {
         String token2 = Randoms.text();
         VideosBuilder builder2 = new VideosBuilder(new UploadedInfo().token(token2));
-        List<AttachmentRequest> list2 = builder2.build();
+        List<AttachmentRequest> list2 = builder2.getList();
         assertThat(list2, is(Collections.singletonList(new VideoAttachmentRequest(new UploadedInfo().token(token2)))));
 
         String token3 = Randoms.text();
         String token4 = Randoms.text();
         VideosBuilder builder3 = new VideosBuilder(new UploadedInfo().token(token3), new UploadedInfo().token(token4));
-        List<AttachmentRequest> list3 = builder3.build();
+        List<AttachmentRequest> list3 = builder3.getList();
         assertThat(list3, is(Arrays.asList(
                 new VideoAttachmentRequest(new UploadedInfo().token(token3)),
                 new VideoAttachmentRequest(new UploadedInfo().token(token4)))
@@ -39,13 +39,13 @@ public class VideosBuilderTest {
     public void shouldBuildfromString() {
         String token2 = Randoms.text();
         VideosBuilder builder2 = new VideosBuilder(token2);
-        List<AttachmentRequest> list2 = builder2.build();
+        List<AttachmentRequest> list2 = builder2.getList();
         assertThat(list2, is(Collections.singletonList(new VideoAttachmentRequest(new UploadedInfo().token(token2)))));
 
         String token3 = Randoms.text();
         String token4 = Randoms.text();
         VideosBuilder builder3 = new VideosBuilder(token3, token4);
-        List<AttachmentRequest> list3 = builder3.build();
+        List<AttachmentRequest> list3 = builder3.getList();
         assertThat(list3, is(Arrays.asList(
                 new VideoAttachmentRequest(new UploadedInfo().token(token3)),
                 new VideoAttachmentRequest(new UploadedInfo().token(token4)))

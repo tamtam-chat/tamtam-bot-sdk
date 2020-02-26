@@ -58,12 +58,8 @@ public class WebhookBot extends TamTamBotBase implements TamTamBot {
             }
         }
 
-        String webhookUrl = container.getWebhookUrl(this);
-        SubscriptionRequestBody body = new SubscriptionRequestBody(webhookUrl);
-        body.updateTypes(options.getUpdateTypes());
-
         try {
-            new SubscribeQuery(getClient(), body).execute();
+            subscribe(container.getWebhookUrl(this));
         } catch (APIException | ClientException e) {
             throw new TamTamBotException("Failed to start webhook bot", e);
         }
@@ -89,7 +85,13 @@ public class WebhookBot extends TamTamBotBase implements TamTamBot {
         return running.get();
     }
 
-    private void unsubscribeAll() throws APIException, ClientException {
+    protected void subscribe(String webhookUrl) throws APIException, ClientException {
+        SubscriptionRequestBody body = new SubscriptionRequestBody(webhookUrl);
+        body.updateTypes(options.getUpdateTypes());
+        new SubscribeQuery(getClient(), body).execute();
+    }
+
+    protected void unsubscribeAll() throws APIException, ClientException {
         List<Subscription> subscriptions = new GetSubscriptionsQuery(getClient()).execute().getSubscriptions();
         for (Subscription subscription : subscriptions) {
             SimpleQueryResult result = new UnsubscribeQuery(getClient(), subscription.getUrl()).execute();
