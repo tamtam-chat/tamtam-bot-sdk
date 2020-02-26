@@ -63,7 +63,7 @@ public abstract class WebhookBotContainerBase implements WebhookBotContainer {
                     continue;
                 }
 
-                LOG.info("Bot {} registered webhook URL: {}", bot, getWebhookUrl(bot));
+                LOG.info("Bot {} started", bot);
             } catch (Exception e) {
                 LOG.error("Failed to start bot {}", bot, e);
             }

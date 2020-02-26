@@ -89,6 +89,7 @@ public class WebhookBot extends TamTamBotBase implements TamTamBot {
         SubscriptionRequestBody body = new SubscriptionRequestBody(webhookUrl);
         body.updateTypes(options.getUpdateTypes());
         new SubscribeQuery(getClient(), body).execute();
+        LOG.info("Bot {} registered webhook URL: {}", this, webhookUrl);
     }
 
     protected void unsubscribeAll() throws APIException, ClientException {
