@@ -85,4 +85,16 @@ public class NewMessageBodyBuilder {
     public NewMessageBody build() {
         return new NewMessageBody(text, attachments == null ? null : attachments.getList(), link);
     }
+
+    public String getText() {
+        return text;
+    }
+
+    public AttachmentsBuilder getAttachments() {
+        return attachments;
+    }
+
+    public NewMessageLink getLink() {
+        return link;
+    }
 }
