@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.UploadedInfo;
@@ -74,8 +76,14 @@ public interface AttachmentsBuilder {
         return () -> Stream.of(requireNonNull(keyboardBuilder, "keyboardBuilder").build());
     }
 
+    @Nullable
     default List<AttachmentRequest> getList() {
-        return build().collect(Collectors.toList());
+        Stream<AttachmentRequest> stream = build();
+        if (stream == null) {
+            return null;
+        }
+
+        return stream.collect(Collectors.toList());
     }
 
     default AttachmentsBuilder with(AttachmentsBuilder anotherBuilder) {
