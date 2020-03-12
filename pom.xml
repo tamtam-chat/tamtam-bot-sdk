@@ -9,6 +9,8 @@
 
     <name>TamTam Java Bot SDK</name>
     <inceptionYear>2020</inceptionYear>
+    <description>Java SDK to build bots for TamTam messenger</description>
+    <url>https://github.com/tamtam-chat/tamtam-bot-sdk</url>
     <organization>
         <name>Mail.Ru Group</name>
         <url>https://corp.mail.ru</url>
