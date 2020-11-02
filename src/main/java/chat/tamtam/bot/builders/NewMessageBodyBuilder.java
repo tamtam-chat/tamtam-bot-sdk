@@ -7,6 +7,7 @@ import chat.tamtam.botapi.model.MessageBody;
 import chat.tamtam.botapi.model.MessageLinkType;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;
+import chat.tamtam.botapi.model.TextFormat;
 
 /**
  * 🏋
@@ -17,6 +18,7 @@ public class NewMessageBodyBuilder {
     private String text;
     private AttachmentsBuilder attachments;
     private NewMessageLink link;
+    private TextFormat textFormat;
 
     private NewMessageBodyBuilder(String text, AttachmentsBuilder attachments, NewMessageLink link) {
         this.text = text;
@@ -82,8 +84,15 @@ public class NewMessageBodyBuilder {
         return this;
     }
 
+    public NewMessageBodyBuilder withTextFormat(TextFormat textFormat) {
+        this.textFormat = textFormat;
+        return this;
+    }
+
     public NewMessageBody build() {
-        return new NewMessageBody(text, attachments == null ? null : attachments.getList(), link);
+        NewMessageBody newMessageBody = new NewMessageBody(text, attachments == null ? null : attachments.getList(), link);
+        newMessageBody.setFormat(this.textFormat);
+        return newMessageBody;
     }
 
     public String getText() {

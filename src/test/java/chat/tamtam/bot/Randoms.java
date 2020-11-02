@@ -28,7 +28,7 @@ public class Randoms {
         long userId = nextId();
         String name = "Name " + userId;
         String username = "username" + userId;
-        return new User(userId, name, username);
+        return new User(userId, name, username, randomBoolean(), randomLong());
     }
 
     public static double randomDouble() {
@@ -42,6 +42,12 @@ public class Randoms {
     public static int randomInt(int bound) {
         return ThreadLocalRandom.current().nextInt(bound);
     }
+
+    public static boolean randomBoolean() {
+        return ThreadLocalRandom.current().nextBoolean();
+    }
+
+    public static long randomLong() {return ThreadLocalRandom.current().nextLong();}
 
     private static long nextId() {
         return NEXT_ID.incrementAndGet();
