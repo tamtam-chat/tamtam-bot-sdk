@@ -10,6 +10,7 @@ import chat.tamtam.botapi.model.AudioAttachmentRequest;
 import chat.tamtam.botapi.model.ContactAttachment;
 import chat.tamtam.botapi.model.ContactAttachmentRequest;
 import chat.tamtam.botapi.model.ContactAttachmentRequestPayload;
+import chat.tamtam.botapi.model.DataAttachment;
 import chat.tamtam.botapi.model.FileAttachment;
 import chat.tamtam.botapi.model.FileAttachmentRequest;
 import chat.tamtam.botapi.model.InlineKeyboardAttachment;
@@ -18,6 +19,7 @@ import chat.tamtam.botapi.model.LocationAttachmentRequest;
 import chat.tamtam.botapi.model.PhotoAttachment;
 import chat.tamtam.botapi.model.PhotoAttachmentRequest;
 import chat.tamtam.botapi.model.PhotoAttachmentRequestPayload;
+import chat.tamtam.botapi.model.ReplyKeyboardAttachment;
 import chat.tamtam.botapi.model.ShareAttachment;
 import chat.tamtam.botapi.model.ShareAttachmentPayload;
 import chat.tamtam.botapi.model.ShareAttachmentRequest;
@@ -80,6 +82,11 @@ public class CopyBuilder implements AttachmentsBuilder, Attachment.Mapper<Attach
     }
 
     @Override
+    public AttachmentRequest map(ReplyKeyboardAttachment replyKeyboardAttachment) {
+        return ReplyKeyboardBuilder.layout(replyKeyboardAttachment.getButtons()).build();
+    }
+
+    @Override
     public AttachmentRequest map(ShareAttachment model) {
         return new ShareAttachmentRequest(new ShareAttachmentPayload()
                 .token(model.getPayload().getToken())
@@ -89,6 +96,12 @@ public class CopyBuilder implements AttachmentsBuilder, Attachment.Mapper<Attach
     @Override
     public AttachmentRequest map(LocationAttachment model) {
         return new LocationAttachmentRequest(model.getLatitude(), model.getLongitude());
+    }
+
+    @Override
+    public AttachmentRequest map(DataAttachment dataAttachment) {
+        // not supported
+        return null;
     }
 
     @Override

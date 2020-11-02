@@ -1,6 +1,7 @@
 package chat.tamtam.bot.builders.attachments;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +29,7 @@ public interface AttachmentsBuilder {
         }
         return requireNonNull(attachments, "attachments").stream()
                 .map(AttachmentsBuilder::copyOf)
-                .reduce(Concat::new)
+                .reduce(Concatenating::new)
                 .orElse(EMPTY);
     }
 
@@ -87,18 +88,22 @@ public interface AttachmentsBuilder {
     }
 
     default AttachmentsBuilder with(AttachmentsBuilder anotherBuilder) {
-        return new Concat(this, requireNonNull(anotherBuilder, "anotherBuilder"));
+        return new Concatenating(this, requireNonNull(anotherBuilder, "anotherBuilder"));
     }
 
     default AttachmentsBuilder filtering(Predicate<? super AttachmentRequest> filter) {
-        return new Filter(this, filter);
+        return new Filtering(this, filter);
     }
 
-    class Concat implements AttachmentsBuilder {
+    default AttachmentsBuilder mapping(Function<AttachmentRequest, AttachmentRequest> mapper) {
+        return new Mapping(this, mapper);
+    }
+
+    class Concatenating implements AttachmentsBuilder {
         private final AttachmentsBuilder left;
         private final AttachmentsBuilder right;
 
-        Concat(AttachmentsBuilder left, AttachmentsBuilder right) {
+        Concatenating(AttachmentsBuilder left, AttachmentsBuilder right) {
             this.left = requireNonNull(left, "left");
             this.right = requireNonNull(right, "right");
         }
@@ -109,18 +114,45 @@ public interface AttachmentsBuilder {
         }
     }
 
-    class Filter implements AttachmentsBuilder {
-        private final AttachmentsBuilder target;
+    class Filtering implements AttachmentsBuilder {
+        private final AttachmentsBuilder upstream;
         private final Predicate<? super AttachmentRequest> filter;
 
-        public Filter(AttachmentsBuilder target, Predicate<? super AttachmentRequest> filter) {
-            this.target = target;
+        public Filtering(AttachmentsBuilder upstream, Predicate<? super AttachmentRequest> filter) {
+            this.upstream = upstream;
             this.filter = filter;
         }
 
         @Override
         public Stream<AttachmentRequest> build() {
-            return target.build().filter(filter);
+            return upstream.build().filter(filter);
+        }
+    }
+
+    class Mapping implements AttachmentsBuilder {
+        private final AttachmentsBuilder upstream;
+        private final Function<AttachmentRequest, AttachmentRequest> mapper;
+
+        public Mapping(AttachmentsBuilder upstream, Function<AttachmentRequest, AttachmentRequest> mapper) {
+            this.upstream = upstream;
+            this.mapper = mapper;
+        }
+
+        @Override
+        public Stream<AttachmentRequest> build() {
+            return upstream.build().map(mapper);
+        }
+
+        public static <T extends AttachmentRequest> Function<AttachmentRequest, AttachmentRequest> byType(
+                Class<T> clazz, Function<T, AttachmentRequest> typedMapper) {
+
+            return attachmentRequest -> {
+                if (attachmentRequest.getClass() == clazz) {
+                    return typedMapper.apply((T) attachmentRequest);
+                }
+
+                return attachmentRequest;
+            };
         }
     }
 }

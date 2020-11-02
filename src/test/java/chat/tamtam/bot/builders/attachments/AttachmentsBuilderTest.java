@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -13,16 +14,21 @@ import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.AudioAttachmentRequest;
 import chat.tamtam.botapi.model.Button;
 import chat.tamtam.botapi.model.CallbackButton;
+import chat.tamtam.botapi.model.FileAttachment;
+import chat.tamtam.botapi.model.FileAttachmentPayload;
 import chat.tamtam.botapi.model.FileAttachmentRequest;
 import chat.tamtam.botapi.model.InlineKeyboardAttachmentRequest;
 import chat.tamtam.botapi.model.InlineKeyboardAttachmentRequestPayload;
+import chat.tamtam.botapi.model.MediaAttachmentPayload;
 import chat.tamtam.botapi.model.PhotoAttachment;
 import chat.tamtam.botapi.model.PhotoAttachmentPayload;
 import chat.tamtam.botapi.model.PhotoAttachmentRequest;
 import chat.tamtam.botapi.model.PhotoAttachmentRequestPayload;
 import chat.tamtam.botapi.model.UploadedInfo;
+import chat.tamtam.botapi.model.VideoAttachment;
 import chat.tamtam.botapi.model.VideoAttachmentRequest;
 
+import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.Mapping.byType;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.audios;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.files;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.inlineKeyboard;
@@ -102,5 +108,26 @@ public class AttachmentsBuilderTest {
                 Collections.singletonList(Collections.singletonList(button)))));
 
         assertThat(result, is(expected));
+    }
+
+    @Test
+    public void testMapping() {
+        PhotoAttachment photoAttachment = new PhotoAttachment(new PhotoAttachmentPayload(1L, "token", "url1"));
+        VideoAttachment videoAttachment = new VideoAttachment(new MediaAttachmentPayload("token2", "url"));
+        FileAttachment fileAttachment = new FileAttachment(new FileAttachmentPayload("token3", "url3"), "filename", 2L);
+
+        List<Attachment> input = new ArrayList<Attachment>() {{
+            add(photoAttachment);
+            add(videoAttachment);
+            add(fileAttachment);
+        }};
+
+        VideoAttachmentRequest newVideoAR = new VideoAttachmentRequest(new UploadedInfo().token("token4"));
+        List<AttachmentRequest> requests = AttachmentsBuilder.copyOf(input)
+                .mapping(byType(VideoAttachmentRequest.class, ar -> newVideoAR))
+                .build()
+                .collect(Collectors.toList());
+
+        assertThat(requests.get(1), is(newVideoAR));
     }
 }
