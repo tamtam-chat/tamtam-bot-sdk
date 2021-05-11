@@ -76,6 +76,10 @@ public interface AttachmentsBuilder {
         return () -> Stream.of(requireNonNull(keyboardBuilder, "keyboardBuilder").build());
     }
 
+    static AttachmentsBuilder sticker(String stickerCode) {
+        return new StickerBuilder(stickerCode);
+    }
+
     @Nullable
     default List<AttachmentRequest> getList() {
         Stream<AttachmentRequest> stream = build();
