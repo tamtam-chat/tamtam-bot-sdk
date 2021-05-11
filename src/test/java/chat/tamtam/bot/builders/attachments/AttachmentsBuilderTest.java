@@ -20,12 +20,15 @@ import chat.tamtam.botapi.model.PhotoAttachment;
 import chat.tamtam.botapi.model.PhotoAttachmentPayload;
 import chat.tamtam.botapi.model.PhotoAttachmentRequest;
 import chat.tamtam.botapi.model.PhotoAttachmentRequestPayload;
+import chat.tamtam.botapi.model.StickerAttachmentRequest;
+import chat.tamtam.botapi.model.StickerAttachmentRequestPayload;
 import chat.tamtam.botapi.model.UploadedInfo;
 import chat.tamtam.botapi.model.VideoAttachmentRequest;
 
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.audios;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.files;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.inlineKeyboard;
+import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.sticker;
 import static chat.tamtam.bot.builders.attachments.AttachmentsBuilder.videos;
 import static chat.tamtam.bot.builders.attachments.InlineKeyboardBuilder.single;
 import static org.hamcrest.CoreMatchers.is;
@@ -47,6 +50,7 @@ public class AttachmentsBuilderTest {
         String token4 = Randoms.text();
         String token5 = Randoms.text();
         String token6 = Randoms.text();
+        String stickerCode = Randoms.text();
         List<AttachmentRequest> attachments = AttachmentsBuilder
                 .photos("123", "345")
                 .with(PhotosBuilder.byUrls("photoUrl"))
@@ -57,6 +61,7 @@ public class AttachmentsBuilderTest {
                 .with(files(token3, token4))
                 .with(files(new UploadedInfo().token(token3), new UploadedInfo().token(token4)))
                 .with(inlineKeyboard(single(button).addRow(button2, button3)))
+                .with(sticker(stickerCode))
                 .getList();
 
         List<AttachmentRequest> expected = new ArrayList<>();
@@ -82,6 +87,8 @@ public class AttachmentsBuilderTest {
                 Collections.singletonList(button),
                 Arrays.asList(button2, button3)
         ))));
+        
+        expected.add(new StickerAttachmentRequest(new StickerAttachmentRequestPayload(stickerCode)));
 
         assertThat(attachments, is(expected));
     }
