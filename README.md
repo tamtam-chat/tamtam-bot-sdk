@@ -84,7 +84,13 @@ All webhook bots should be put in container that manages server and handle all i
 
 ```java
 WebhookEchoBot bot1 = new WebhookEchoBot("%ACCESS_TOKEN%");
-WebhookBot bot2 = new WebhookBot("%ANOTHER_ACCESS_TOKEN%");
+WebhookBot bot2 = new WebhookBot("%ANOTHER_ACCESS_TOKEN%") {
+   @UpdateHandler
+   public NewMessageBody onMessageCreated(MessageCreatedUpdate update) {
+       // webhook bots can also reply with message simply returning it from update handler 
+       return NewMessageBodyBuilder.ofText("Reply from handler").build();
+   }
+};
 
 JettyWebhookBotContainer botContainer = new JettyWebhookBotContainer("mysupercoolbot.com", 8080);
 botContainer.register(bot1);
