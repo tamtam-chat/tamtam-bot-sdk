@@ -249,7 +249,7 @@ public class TamTamBotBase implements TamTamBot {
     }
 
 
-    private class CommandHandle {
+    private static class CommandHandle {
         private final int expectedArgs;
         private final boolean shouldParseArgs;
         private final MethodHandle handle;

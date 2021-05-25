@@ -42,9 +42,12 @@ public class ReplyBot extends LongPollingBot {
     }
 
     @UpdateHandler
-    public Object onMessageCreated(MessageCreatedUpdate update) {
+    public void onMessageCreated(MessageCreatedUpdate update) throws ClientException {
         Message message = update.getMessage();
-        return NewMessageBodyBuilder.ofText("Reply on: " + message.getBody()).build(); // return null if you do not want to reply synchronously
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Reply on: " + message.getBody()).build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.enqueue(); // or `execute` to invoke method synchronously
     }
 }
 ```
