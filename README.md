@@ -20,7 +20,7 @@ Maven:
 
 Gradle:
 ```
-implementation group: 'chat.tamtam', name: 'tamtam-bot-sdk', version: '0.0.1'
+implementation group: 'chat.tamtam', name: 'tamtam-bot-sdk', version: '0.0.2'
 ```
 
 Then you should choose the way how your bot will receive notifications: long-polling or webhook.
