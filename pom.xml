@@ -5,7 +5,7 @@
 
     <groupId>chat.tamtam</groupId>
     <artifactId>tamtam-bot-sdk</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
 
     <name>TamTam Java Bot SDK</name>
     <inceptionYear>2020</inceptionYear>
@@ -37,7 +37,7 @@
         <url>https://github.com/tamtam-chat/tamtam-bot-sdk</url>
         <connection>scm:git:https://github.com/tamtam-chat/tamtam-bot-sdk.git</connection>
         <developerConnection>scm:git:https://github.com/tamtam-chat/tamtam-bot-sdk.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.0.2</tag>
     </scm>
 
     <properties>
