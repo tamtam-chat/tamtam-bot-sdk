@@ -9,6 +9,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Describes a command with not parsed arguments.
+ *
  * @author alexandrchuprin
  */
 public class RawCommandLine {
