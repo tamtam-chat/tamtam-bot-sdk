@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated method is a "command handler".
+ * Indicates that an annotated method handles incoming bot command (a message started with `/command`).
  * Such methods are considered as candidates for auto-detection
- * when their classes added as "handler" to {@link chat.tamtam.bot.TamTamBotBase TamTamBotBase} or its inheritors.
+ * when its containing class added as "handler" to {@link chat.tamtam.bot.TamTamBotBase TamTamBotBase} or its inheritors.
  * An annotated method must have {@link chat.tamtam.botapi.model.Message Message}
  * as the first parameter in the method definition, but amount of parameters can be more than one.
  * <p>
