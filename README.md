@@ -65,13 +65,18 @@ public class ReplyBot extends LongPollingBot {
 
     @CommandHandler("/command1")
     public void handleCommandOne(Message message) {
-        System.out.println("Executed command1 handler");
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Executed command1").build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.enqueue(); // or `execute` to invoke method synchronously
     }
 
     @CommandHandler("/command2")
     public void handleCommandTwo(Message message, String arg1, String arg2) {
-        System.out.println("Executed command2 handler");
-        System.out.println("Args of command2: " + arg1 + ", " + arg2);
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Args of command2: " + arg1 + ", " + arg2).build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.execute(); // invoke synchronously
     }
 
 }
