@@ -14,13 +14,13 @@ Maven:
 <dependency>
     <groupId>chat.tamtam</groupId>
     <artifactId>tamtam-bot-sdk</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
 Gradle:
 ```
-implementation group: 'chat.tamtam', name: 'tamtam-bot-sdk', version: '0.0.1'
+implementation group: 'chat.tamtam', name: 'tamtam-bot-sdk', version: '0.0.2'
 ```
 
 Then you should choose the way how your bot will receive notifications: long-polling or webhook.
@@ -31,7 +31,7 @@ Long-polling is the easiest way to receive updates for your bot because it does 
 
 To start your bot just extend [`LongPollingBot`](src/main/java/chat/tamtam/bot/longpolling/LongPollingBot.java) class and add methods annotated by [`@UpdateHandler`](src/main/java/chat/tamtam/bot/annotations/UpdateHandler.java) annotation.
 
-These methods should have **only** one parameter with concrete implementation of [`Update`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Update.java). Every method will handle update of such type.
+These methods should have **only** one parameter of type [`Update`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Update.java). Every method will handle update of such type.
 
 For example, simple bot that just replies on incoming message:
 
@@ -42,37 +42,17 @@ public class ReplyBot extends LongPollingBot {
     }
 
     @UpdateHandler
-    public void onMessageCreated(MessageCreatedUpdate update) {
+    public void onMessageCreated(MessageCreatedUpdate update) throws ClientException {
         Message message = update.getMessage();
-        System.out.println("Message body: " + message.getBody());
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Reply on: " + message.getBody()).build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.enqueue(); // or `execute` to invoke method synchronously
     }
 }
 ```
 
 All other updates will be ignored. If you want to handle every update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
-
-Along with update handlers, methods can be annotated by [`@CommandHandler`](src/main/java/chat/tamtam/bot/annotations/CommandHandler.java). Every method will handle command with the name specified in the annotation.
-These methods should have [`Message`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Message.java) as the first parameter. Also, these methods can have command args in the method definition. 
-Example: user typed "/command2 text tamtam", then "text" will be arg1 and "tamtam" will be arg2.
-```java
-public class ReplyBot extends LongPollingBot {
-    public ReplyBot(String accessToken) {
-        super(accessToken);
-    }
-
-    @CommandHandler("/command1")
-    public void handleCommandOne(Message message) {
-        System.out.println("Executed command1 handler");
-    }
-
-    @CommandHandler("/command2")
-    public void handleCommandTwo(Message message, String arg1, String arg2) {
-        System.out.println("Executed command2 handler");
-        System.out.println("Args of command2: " + arg1 + ", " + arg2);
-    }
-
-}
-```
 
 Alternatively, you can directly create instance of `LongPollingBot` and pass handlers to constructor:
 ```java
@@ -104,7 +84,13 @@ All webhook bots should be put in container that manages server and handle all i
 
 ```java
 WebhookEchoBot bot1 = new WebhookEchoBot("%ACCESS_TOKEN%");
-WebhookBot bot2 = new WebhookBot("%ANOTHER_ACCESS_TOKEN%");
+WebhookBot bot2 = new WebhookBot("%ANOTHER_ACCESS_TOKEN%") {
+   @UpdateHandler
+   public NewMessageBody onMessageCreated(MessageCreatedUpdate update) {
+       // webhook bots can also reply with message simply returning it from update handler 
+       return NewMessageBodyBuilder.ofText("Reply from handler").build();
+   }
+};
 
 JettyWebhookBotContainer botContainer = new JettyWebhookBotContainer("mysupercoolbot.com", 8080);
 botContainer.register(bot1);

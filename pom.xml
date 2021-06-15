@@ -5,10 +5,12 @@
 
     <groupId>chat.tamtam</groupId>
     <artifactId>tamtam-bot-sdk</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <name>TamTam Java Bot SDK</name>
     <inceptionYear>2020</inceptionYear>
+    <description>Java SDK to build bots for TamTam messenger</description>
+    <url>https://github.com/tamtam-chat/tamtam-bot-sdk</url>
     <organization>
         <name>Mail.Ru Group</name>
         <url>https://corp.mail.ru</url>
@@ -49,7 +51,7 @@
         <dependency>
             <groupId>chat.tamtam</groupId>
             <artifactId>tamtam-bot-api</artifactId>
-            <version>0.2.1</version>
+            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -69,7 +71,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.7</version>
         </dependency>
 
         <!-- For tests -->

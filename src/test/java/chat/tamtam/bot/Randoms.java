@@ -21,14 +21,15 @@ public class Randoms {
 
     public static Update randomUpdate() {
         User user = randomUser();
-        return new BotAddedToChatUpdate(nextId(), user, nextId());
+        return new BotAddedToChatUpdate(nextId(), user, ThreadLocalRandom.current().nextBoolean(), nextId());
     }
 
     public static User randomUser() {
         long userId = nextId();
         String name = "Name " + userId;
         String username = "username" + userId;
-        return new User(userId, name, username);
+        return new User(userId, name, username, ThreadLocalRandom.current().nextBoolean(),
+                ThreadLocalRandom.current().nextLong(0, Long.MAX_VALUE));
     }
 
     public static double randomDouble() {

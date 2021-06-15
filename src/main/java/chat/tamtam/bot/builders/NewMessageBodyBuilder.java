@@ -7,6 +7,7 @@ import chat.tamtam.botapi.model.MessageBody;
 import chat.tamtam.botapi.model.MessageLinkType;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;
+import chat.tamtam.botapi.model.TextFormat;
 
 /**
  * 🏋
@@ -17,6 +18,7 @@ public class NewMessageBodyBuilder {
     private String text;
     private AttachmentsBuilder attachments;
     private NewMessageLink link;
+    private TextFormat format;
 
     private NewMessageBodyBuilder(String text, AttachmentsBuilder attachments, NewMessageLink link) {
         this.text = text;
@@ -35,6 +37,12 @@ public class NewMessageBodyBuilder {
         return new NewMessageBodyBuilder(text, null, null);
     }
 
+    public static NewMessageBodyBuilder ofText(String text, TextFormat format) {
+        NewMessageBodyBuilder builder = new NewMessageBodyBuilder(text, null, null);
+        builder.format = format;
+        return builder;
+    }
+
     public static NewMessageBodyBuilder ofAttachments(AttachmentsBuilder attachmentsBuilder) {
         return new NewMessageBodyBuilder(null, attachmentsBuilder, null);
     }
@@ -49,6 +57,12 @@ public class NewMessageBodyBuilder {
 
     public NewMessageBodyBuilder withText(String text) {
         this.text = text;
+        return this;
+    }
+
+    public NewMessageBodyBuilder withText(String text, TextFormat format) {
+        withText(text);
+        this.format = format;
         return this;
     }
 
@@ -83,7 +97,8 @@ public class NewMessageBodyBuilder {
     }
 
     public NewMessageBody build() {
-        return new NewMessageBody(text, attachments == null ? null : attachments.getList(), link);
+        return new NewMessageBody(text, attachments == null ? null : attachments.getList(), link)
+                .format(format);
     }
 
     public String getText() {
