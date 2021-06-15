@@ -62,7 +62,7 @@ public class ReplyBot extends LongPollingBot {
 
     @CommandHandler("/command1")
     public void handleCommandOne(Message message) {
-        System.out.println("Executed command1 handler ");
+        System.out.println("Executed command1 handler");
     }
 
     @CommandHandler("/command2")
