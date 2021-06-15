@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Such methods are considered as candidates for auto-detection
  * when its containing class added as "handler" to {@link chat.tamtam.bot.TamTamBotBase TamTamBotBase} or its inheritors.
  * An annotated method must have {@link chat.tamtam.botapi.model.Message Message}
- * as the first parameter in the method definition, but amount of parameters can be more than one.
+ * as the first parameter in the definition, but amount of parameters can be more than one.
  * <p>
  * There is one more way to define command: using {@link chat.tamtam.bot.commands.Command} and
  * {@link chat.tamtam.bot.commands.CommandHandler}
