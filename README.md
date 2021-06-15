@@ -68,7 +68,7 @@ public class ReplyBot extends LongPollingBot {
         NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Executed command1").build();
         Long chatId = update.getMessage().getRecipient().getChatId();
         SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
-        query.enqueue(); // invoke asynchronously (or `execute` to invoke method synchronously)
+        query.enqueue(); // invoke asynchronously
     }
 
     @CommandHandler("/command2")
