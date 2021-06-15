@@ -9,17 +9,30 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
+ * Describes a command with parsed arguments.
+ *
  * @author alexandrchuprin
+ * @see CommandLineParser
+ * @see chat.tamtam.bot.chat.ChatBot
  */
 public class CommandLine {
     private final String key;
     private final String[] args;
 
+
+    /**
+     * @param key command name
+     * @param args command args
+     */
     public CommandLine(String key, String[] args) {
         this.key = Objects.requireNonNull(key, "key");
         this.args = Objects.requireNonNull(args, "args");
     }
 
+    /**
+     * @param rawCommandLine command with not parsed arguments
+     * @return instance of CommandLine with parsed arguments
+     */
     public static CommandLine fromRaw(RawCommandLine rawCommandLine) {
         return new CommandLine(rawCommandLine.getKey(), CommandLineParser.parseArgs(rawCommandLine.getTail()));
     }

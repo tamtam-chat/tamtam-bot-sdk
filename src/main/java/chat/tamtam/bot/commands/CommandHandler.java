@@ -10,5 +10,10 @@ public interface CommandHandler {
 
     };
 
+    /**
+     * Method to handle incoming bot command.
+     * @param message message from {@link chat.tamtam.botapi.model.MessageCreatedUpdate MessageCreatedUpdate}
+     * @param commandLine parsed command
+     */
     void execute(Message message, CommandLine commandLine);
 }

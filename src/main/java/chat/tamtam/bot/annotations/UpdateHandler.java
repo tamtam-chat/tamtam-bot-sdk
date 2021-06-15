@@ -6,7 +6,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Indicates that an annotated method handles incoming updates.
+ * Such methods are considered as candidates for auto-detection
+ * when its containing class added as "handler" to {@link chat.tamtam.bot.TamTamBotBase TamTamBotBase} or its inheritors.
+ * An annotated method must have one parameter with concrete implementation of {@link chat.tamtam.botapi.model.Update Update}
+ * in the definition.
+ *
  * @author alexandrchuprin
+ * @see chat.tamtam.bot.TamTamBotBase
+ * @see chat.tamtam.botapi.model.Update
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
