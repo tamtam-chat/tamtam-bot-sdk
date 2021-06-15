@@ -49,6 +49,8 @@ public class ReplyBot extends LongPollingBot {
 }
 ```
 
+All other updates will be ignored. If you want to handle every update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
+
 Along with update handlers, methods can be annotated by [`@CommandHandler`](src/main/java/chat/tamtam/bot/annotations/CommandHandler.java). Every method will handle command with the name specified in the annotation.
 These methods should have [`Message`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Message.java) as the first parameter. Also, these methods can have command args in the method definition. 
 Example: user typed "/command2 text tamtam", then "text" will be arg1 and "tamtam" will be arg2.
@@ -71,8 +73,6 @@ public class ReplyBot extends LongPollingBot {
 
 }
 ```
-
-All other updates will be ignored. If you want to handle every update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
 
 Alternatively, you can directly create instance of `LongPollingBot` and pass handlers to constructor:
 ```java
