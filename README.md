@@ -31,7 +31,7 @@ Long-polling is the easiest way to receive updates for your bot because it does 
 
 To start your bot just extend [`LongPollingBot`](src/main/java/chat/tamtam/bot/longpolling/LongPollingBot.java) class and add methods annotated by [`@UpdateHandler`](src/main/java/chat/tamtam/bot/annotations/UpdateHandler.java) annotation.
 
-These methods should have **only** one parameter with concrete implementation of [`Update`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Update.java). Every method will handle update of such type.
+These methods must have **only** one parameter with concrete implementation of [`Update`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Update.java). Every method will handle update of such type.
 
 For example, simple bot that just replies on incoming message:
 
@@ -53,36 +53,6 @@ public class ReplyBot extends LongPollingBot {
 ```
 
 All other updates will be ignored. If you want to handle every update just override `onUpdate` method of [`TamTamBotBase`](src/main/java/chat/tamtam/bot/TamTamBotBase.java).
-
-### Handling bot commands
-
-Along with update handlers, methods can be annotated by [`@CommandHandler`](src/main/java/chat/tamtam/bot/annotations/CommandHandler.java). Every method will handle command with the name specified in the annotation.
-These methods should have [`Message`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Message.java) as the first parameter. Also, these methods can have command args in the method definition. 
-Example: user typed "/command2 text tamtam", then "text" will be arg1 and "tamtam" will be arg2.
-```java
-public class ReplyBot extends LongPollingBot {
-    public ReplyBot(String accessToken) {
-        super(accessToken);
-    }
-
-    @CommandHandler("/command1")
-    public void handleCommandOne(Message message) {
-        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Executed command1").build();
-        Long chatId = update.getMessage().getRecipient().getChatId();
-        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
-        query.enqueue(); // invoke asynchronously
-    }
-
-    @CommandHandler("/command2")
-    public void handleCommandTwo(Message message, String arg1, String arg2) {
-        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Args of command2: " + arg1 + ", " + arg2).build();
-        Long chatId = update.getMessage().getRecipient().getChatId();
-        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
-        query.execute(); // invoke synchronously
-    }
-
-}
-```
 
 Alternatively, you can directly create instance of `LongPollingBot` and pass handlers to constructor:
 ```java
@@ -136,6 +106,36 @@ botContainer.start();
 Check out [jetty-webhook-echobot](examples/jetty-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
 for more complete example or [tomcat-webhook-echobot](examples/tomcat-webhook-echobot/src/main/java/chat/tamtam/echobot/WebhookEchoBot.java)
 as an example of alternative container implementation.
+
+### Handling bot commands
+
+Along with update handlers, methods can be annotated by [`@CommandHandler`](src/main/java/chat/tamtam/bot/annotations/CommandHandler.java). Every method will handle command with the name specified in the annotation.
+These methods should have [`Message`](https://github.com/tamtam-chat/tamtam-bot-api/blob/master/src/main/java/chat/tamtam/botapi/model/Message.java) **as the first parameter**. Also, these methods can have command args in the method definition. 
+Example: user typed "/command2 text tamtam", then "text" will be arg1 and "tamtam" will be arg2.
+```java
+public class ReplyBot extends LongPollingBot {
+    public ReplyBot(String accessToken) {
+        super(accessToken);
+    }
+
+    @CommandHandler("/command1")
+    public void handleCommandOne(Message message) {
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Executed command1").build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.enqueue(); // invoke asynchronously
+    }
+
+    @CommandHandler("/command2")
+    public void handleCommandTwo(Message message, String arg1, String arg2) {
+        NewMessageBody replyMessage = NewMessageBodyBuilder.ofText("Args of command2: " + arg1 + ", " + arg2).build();
+        Long chatId = update.getMessage().getRecipient().getChatId();
+        SendMessageQuery query = new SendMessageQuery(getClient(), replyMessage).chatId(chatId);
+        query.execute(); // invoke synchronously
+    }
+
+}
+```
 
 ## Requirements
 
