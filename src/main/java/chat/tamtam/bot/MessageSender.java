@@ -8,6 +8,7 @@ import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;
 import chat.tamtam.botapi.model.SendMessageResult;
+import chat.tamtam.botapi.model.TextFormat;
 import chat.tamtam.botapi.queries.SendMessageQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class MessageSender {
      * @param messageBody message
      */
     public void sendMessage(long userId, NewMessageBody messageBody) {
-        if (messageBody.getText().length() <= 4000) { // 4000 - max characters in message text
+        if (messageBody.getText() == null || messageBody.getText().length() <= 4000) { // 4000 - max characters in message text
             try {
                 new SendMessageQuery(client, messageBody).userId(userId).enqueue();
             } catch (ClientException e) {
@@ -50,14 +51,15 @@ public class MessageSender {
             }
         }
 
-        List<AttachmentRequest> attachments = messageBody.getAttachments();
-        NewMessageLink link = messageBody.getLink();
-
         String[] splitText = splitTextByMaxCharsInMessage(messageBody.getText());
         try {
-            sendMessageWithResult(userId, new NewMessageBody(splitText[0], attachments, link));
+            boolean notify = messageBody.isNotify();
+            TextFormat format = messageBody.getFormat();
+
+            NewMessageBody msg = createNewMessageBody(splitText[0], messageBody.getAttachments(), messageBody.getLink(), notify, format);
+            sendMessageWithResult(userId, msg);
             for (int i = 1; i < splitText.length; i++) {
-                sendMessageWithResult(userId, NewMessageBodyBuilder.ofText(splitText[i]).build());
+                sendMessageWithResult(userId, createNewMessageBody(splitText[i], null, null, notify, format));
             }
         } catch (APIException | ClientException e) {
             LOG.error("Failed to send message to user=" + userId, e);
@@ -84,6 +86,13 @@ public class MessageSender {
         }
 
         return split;
+    }
+
+    private NewMessageBody createNewMessageBody(String text, List<AttachmentRequest> attachments, NewMessageLink link, boolean notify, TextFormat format) {
+        NewMessageBody newMessageBody = new NewMessageBody(text, attachments, link);
+        newMessageBody.setNotify(notify);
+        newMessageBody.setFormat(format);
+        return newMessageBody;
     }
 
     private static int getEndIndexOfMaxAvailableSubstringToSend(StringBuilder sb) {

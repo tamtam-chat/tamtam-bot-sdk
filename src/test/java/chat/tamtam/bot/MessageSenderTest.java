@@ -7,6 +7,7 @@ import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.NewMessageBody;
 import chat.tamtam.botapi.model.NewMessageLink;
 import chat.tamtam.botapi.model.SendMessageResult;
+import chat.tamtam.botapi.model.TextFormat;
 import chat.tamtam.botapi.queries.SendMessageQuery;
 import chat.tamtam.botapi.queries.TamTamQuery;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -46,6 +48,8 @@ public class MessageSenderTest {
         List<AttachmentRequest> list = Collections.singletonList(mock(AttachmentRequest.class));
         NewMessageLink link = mock(NewMessageLink.class);
         NewMessageBody messageBodyOriginal = new NewMessageBody(manyEmojis, list, link);
+        messageBodyOriginal.setFormat(TextFormat.HTML);
+        messageBodyOriginal.setNotify(true);
 
         // invoke testing method
         MessageSender messageSender = new MessageSender(tamTamClient);
@@ -54,8 +58,18 @@ public class MessageSenderTest {
         // assert
         ArgumentCaptor<SendMessageQuery> argument = ArgumentCaptor.forClass(SendMessageQuery.class);
         verify(tamTamClient, times(2)).newCall(argument.capture());
+
         NewMessageBody messageBody1 = new NewMessageBody(manyEmojisSplit[0], list, link);
         NewMessageBody messageBody2 = new NewMessageBody(manyEmojisSplit[1], null, null);
+
+        assertThat(argument.getAllValues().get(0).getBody(), not(messageBody1));
+        assertThat(argument.getAllValues().get(1).getBody(), not(messageBody2));
+
+        messageBody1.setFormat(TextFormat.HTML);
+        messageBody1.setNotify(true);
+        messageBody2.setFormat(TextFormat.HTML);
+        messageBody2.setNotify(true);
+
         assertThat(argument.getAllValues().get(0).getBody(), is(messageBody1));
         assertThat(argument.getAllValues().get(1).getBody(), is(messageBody2));
     }
