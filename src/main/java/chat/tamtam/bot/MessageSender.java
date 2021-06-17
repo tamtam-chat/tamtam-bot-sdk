@@ -1,6 +1,5 @@
 package chat.tamtam.bot;
 
-import chat.tamtam.bot.builders.NewMessageBodyBuilder;
 import chat.tamtam.botapi.client.TamTamClient;
 import chat.tamtam.botapi.exceptions.APIException;
 import chat.tamtam.botapi.exceptions.ClientException;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,7 +25,7 @@ public class MessageSender {
      * Max characters in message text,
      * see <a href="https://dev.tamtam.chat/#operation/sendMessage">Send Message (Bot API)</a>
      */
-    private static final int maxCharsInMessage = 4000;
+    private static final int MAX_CHARS_IN_MESSAGE = 4000;
 
     private final TamTamClient client;
 
@@ -35,9 +33,8 @@ public class MessageSender {
         this.client = client;
     }
 
-
     /**
-     * If messageBody has text with length more than {@link MessageSender#maxCharsInMessage}, then it will be automatically
+     * If messageBody has text with length more than {@link MessageSender#MAX_CHARS_IN_MESSAGE}, then it will be automatically
      * split and sent as several messages.
      * @param userId recipient
      * @param messageBody message
@@ -72,11 +69,11 @@ public class MessageSender {
 
     /**
      * @param text text to send
-     * @return text split by {@link MessageSender#maxCharsInMessage} chars per cell
-     * @see MessageSender#maxCharsInMessage
+     * @return text split by {@link MessageSender#MAX_CHARS_IN_MESSAGE} chars per cell
+     * @see MessageSender#MAX_CHARS_IN_MESSAGE
      */
     public static String[] splitTextByMaxCharsInMessage(String text) {
-        String[] split = new String[text.length() / maxCharsInMessage + 1];
+        String[] split = new String[text.length() / MAX_CHARS_IN_MESSAGE + 1];
         StringBuilder sb = new StringBuilder(text);
 
         for (int i = 0; i < split.length; i++) {
@@ -96,13 +93,13 @@ public class MessageSender {
     }
 
     private static int getEndIndexOfMaxAvailableSubstringToSend(StringBuilder sb) {
-        if (sb.length() <= maxCharsInMessage) {
+        if (sb.length() <= MAX_CHARS_IN_MESSAGE) {
             return sb.length() - 1;
         }
 
         // if the last char is not surrogate, then it isn't an emoji and we can return
-        if (!Character.isSurrogate(sb.charAt(maxCharsInMessage - 1))) {
-            return maxCharsInMessage - 1;
+        if (!Character.isSurrogate(sb.charAt(MAX_CHARS_IN_MESSAGE - 1))) {
+            return MAX_CHARS_IN_MESSAGE - 1;
         }
 
         return getEndIndexWithoutSplittingEmoji(sb);
@@ -110,14 +107,14 @@ public class MessageSender {
 
     private static int getEndIndexWithoutSplittingEmoji(StringBuilder sb) {
         // If so, then an emoji fits completely into the substring [0, maxCharsInMessage).
-        if (Character.isLowSurrogate(sb.charAt(maxCharsInMessage - 1))
-                && sb.charAt(maxCharsInMessage) != 8205) { // 8205 - Zero Width Joiner
-            return maxCharsInMessage - 1;
+        if (Character.isLowSurrogate(sb.charAt(MAX_CHARS_IN_MESSAGE - 1))
+                && sb.charAt(MAX_CHARS_IN_MESSAGE) != 8205) { // 8205 - Zero Width Joiner
+            return MAX_CHARS_IN_MESSAGE - 1;
         }
 
         // if we are here, then there is an emoji, which has unicode code units before char with index maxCharsInMessage
         // and has after this char
-        for (int i = maxCharsInMessage - 2; i > 0; i--) {
+        for (int i = MAX_CHARS_IN_MESSAGE - 2; i > 0; i--) {
             if (!Character.isSurrogate(sb.charAt(i)) && sb.charAt(i) != 8205) {
                 return i;
             }
@@ -128,6 +125,6 @@ public class MessageSender {
         }
 
         // if we are here, then there is something wrong with this string
-        return maxCharsInMessage - 1;
+        return MAX_CHARS_IN_MESSAGE - 1;
     }
 }
