@@ -50,7 +50,7 @@ public class MessageSender {
 
         String[] splitText = splitTextByMaxCharsInMessage(messageBody.getText());
         try {
-            boolean notify = messageBody.isNotify();
+            Boolean notify = messageBody.isNotify();
             TextFormat format = messageBody.getFormat();
 
             NewMessageBody msg = createNewMessageBody(splitText[0], messageBody.getAttachments(), messageBody.getLink(), notify, format);
@@ -85,7 +85,7 @@ public class MessageSender {
         return split;
     }
 
-    private NewMessageBody createNewMessageBody(String text, List<AttachmentRequest> attachments, NewMessageLink link, boolean notify, TextFormat format) {
+    private NewMessageBody createNewMessageBody(String text, List<AttachmentRequest> attachments, NewMessageLink link, Boolean notify, TextFormat format) {
         NewMessageBody newMessageBody = new NewMessageBody(text, attachments, link);
         newMessageBody.setNotify(notify);
         newMessageBody.setFormat(format);
@@ -98,7 +98,7 @@ public class MessageSender {
         }
 
         // if the last char is not surrogate, then it isn't an emoji and we can return
-        if (!Character.isSurrogate(sb.charAt(MAX_CHARS_IN_MESSAGE - 1))) {
+        if (!Character.isSurrogate(sb.charAt(MAX_CHARS_IN_MESSAGE - 1)) && sb.charAt(MAX_CHARS_IN_MESSAGE - 1) != 8205) {
             return MAX_CHARS_IN_MESSAGE - 1;
         }
 
