@@ -43,8 +43,10 @@ public class MessageSender {
         if (messageBody.getText() == null || messageBody.getText().length() <= 4000) { // 4000 - max characters in message text
             try {
                 new SendMessageQuery(client, messageBody).userId(userId).enqueue();
+                return;
             } catch (ClientException e) {
                 LOG.error("Failed to send message to user=" + userId, e);
+                return;
             }
         }
 
