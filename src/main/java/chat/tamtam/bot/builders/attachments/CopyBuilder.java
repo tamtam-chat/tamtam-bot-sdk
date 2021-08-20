@@ -1,8 +1,5 @@
 package chat.tamtam.bot.builders.attachments;
 
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import chat.tamtam.botapi.model.Attachment;
 import chat.tamtam.botapi.model.AttachmentRequest;
 import chat.tamtam.botapi.model.AudioAttachment;
@@ -28,6 +25,8 @@ import chat.tamtam.botapi.model.UploadedInfo;
 import chat.tamtam.botapi.model.User;
 import chat.tamtam.botapi.model.VideoAttachment;
 import chat.tamtam.botapi.model.VideoAttachmentRequest;
+
+import java.util.stream.Stream;
 
 /**
  * Creates {@link AttachmentRequest} from existing {@link Attachment}
@@ -69,9 +68,18 @@ public class CopyBuilder implements AttachmentsBuilder, Attachment.Mapper<Attach
 
     @Override
     public AttachmentRequest map(ContactAttachment model) {
-        User tamInfo = Objects.requireNonNull(model.getPayload().getTamInfo(), "tamInfo is required");
-        return new ContactAttachmentRequest(
-                new ContactAttachmentRequestPayload(tamInfo.getName()).contactId(tamInfo.getUserId()));
+        User tamInfo = model.getPayload().getTamInfo();
+
+        ContactAttachmentRequestPayload payload;
+        if (tamInfo != null) {
+            payload = new ContactAttachmentRequestPayload(tamInfo.getName());
+            payload.setContactId(tamInfo.getUserId());
+        } else {
+            payload = new ContactAttachmentRequestPayload(null);
+        }
+        payload.setVcfInfo(model.getPayload().getVcfInfo());
+
+        return new ContactAttachmentRequest(payload);
     }
 
     @Override
